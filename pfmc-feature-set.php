@@ -30,3 +30,5 @@ if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
 
 	return;
 }
+
+require_once __DIR__ . '/includes/managed-fisheries.php';
