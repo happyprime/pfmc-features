@@ -9,7 +9,13 @@ namespace PFMCFS\Post_Type\Council_Meetings;
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type', 10, 1 );
 add_action( 'save_post', __NAMESPACE__ . '\save_council_meeting_meta', 1 );
+add_action( 'save_post_council_meeting', __NAMESPACE__ . '\create_event', 10, 2 );
+add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event', 10, 1 );
+add_action( 'template_redirect', __NAMESPACE__ . '\redirect_events', 10 );
+
 add_shortcode( 'council_meeting', __NAMESPACE__ . '\render_council_meeting_shortcode', 10 );
+add_shortcode( 'past_council_meeting_list', __NAMESPACE__ . '\show_past_council_meetings', 10 );
+add_shortcode( 'future_council_meeting_list', __NAMESPACE__ . '\show_future_council_meetings', 10 );
 
 /**
  * Register the Council Meeting post type.
@@ -333,6 +339,215 @@ function save_council_meeting_meta( $post_id ) {
 }
 
 /**
+ * Create a Sugar Calendar event using data from a Council Meeting post.
+ *
+ * @param int     $post_id The post ID.
+ * @param WP_Post $post    Post object.
+ */
+function create_event( $post_id, $post ) {
+
+	// Return early if the `sugar_calendar_add_event` function doesn't exist.
+	if ( ! function_exists( 'sugar_calendar_add_event' ) ) {
+		return;
+	}
+
+	// Return early if this is a revision.
+	if ( wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+
+	// Return early if this is an autosave.
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	// The `save_post` hook fires as soon as "Add New…" is clicked,
+	// and we don't want to create an event post at that time.
+	if ( 'Auto Draft' === $post->post_title ) {
+		return;
+	}
+
+	// Return early if the nonce isn't in place.
+	if ( ! isset( $_POST['meeting_meta_fields'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['meeting_meta_fields'] ) ), basename( __FILE__ ) ) ) {
+		return;
+	}
+
+	// Return early if the event date meta isn't available.
+	if (
+		! isset( $_POST['council_meeting_start_date'] ) || '' === sanitize_text_field( wp_unslash( $_POST['council_meeting_start_date'] ) )
+		|| ! isset( $_POST['council_meeting_end_date'] ) || '' === sanitize_text_field( wp_unslash( $_POST['council_meeting_end_date'] ) )
+	) {
+		return;
+	}
+
+	// Get the Council Meeting post data that we'll be using.
+	$permalink = esc_url( get_permalink( $post_id ) );
+	$title     = wp_strip_all_tags( $post->post_title );
+	$location  = sanitize_text_field( wp_unslash( $_POST['council_meeting_location'] ) );
+	$start     = sanitize_text_field( wp_unslash( $_POST['council_meeting_start_date'] . ' 00:00:00' ) );
+	$end       = sanitize_text_field( wp_unslash( $_POST['council_meeting_end_date'] . ' 00:00:00' ) );
+
+	// Define the data to use for updating or adding the `sc_event` post.
+	$sc_event_post = array(
+		'post_title'   => $title,
+		'post_status'  => $post->post_status,
+		'post_content' => $post->post_excerpt,
+	);
+
+	// Define the data to use for either updating or adding an event.
+	$sc_event_data = array(
+		'title'    => $title,
+		'status'   => $post->post_status,
+		'start'    => $start,
+		'end'      => $end,
+		'location' => $location,
+	);
+
+	// Check for an `sc_event` post that has the permalink as
+	// the value of the `_council_meeting_permalink` meta key.
+	$sc_event_query = new \WP_Query(
+		array(
+			'meta_key'               => '_council_meeting_permalink', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'             => $permalink, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'post_type'              => 'sc_event',
+			'posts_per_page'         => 1,
+			'no_found_rows'          => true,
+			'update_post_term_cache' => false,
+			'fields'                 => 'ids',
+		)
+	);
+
+	// If an `sc_event` post was found, update its data and then bail.
+	if ( $sc_event_query->have_posts() ) {
+		while ( $sc_event_query->have_posts() ) {
+			$sc_event_query->the_post();
+			$event = sugar_calendar_get_event_by_object( get_the_ID() );
+
+			// If an event was found, update its post and data.
+			if ( $event ) {
+
+				// Update the `sc_event` post.
+				$sc_event_post['ID'] = get_the_ID();
+				wp_update_post( $sc_event_post );
+
+				// Update the event data.
+				$sc_event_data['object_id'] = get_the_ID();
+				sugar_calendar_update_event( $event->id, $sc_event_data );
+			}
+		}
+
+		return;
+	}
+
+	// Create the `sc_event` post using the council meeting data.
+	$sc_event = wp_insert_post(
+		array_merge(
+			$sc_event_post,
+			array(
+				'post_type'  => 'sc_event',
+				'meta_input' => array(
+					'_council_meeting_permalink' => $permalink,
+				),
+			)
+		)
+	);
+
+	// Return early if the `sc_event` post creation failed.
+	if ( ! $sc_event ) {
+		return;
+	}
+
+	// Merge additional properties before adding event data.
+	$sc_event_data = array_merge(
+		$sc_event_data,
+		array(
+			'object_id'      => $sc_event,
+			'object_type'    => 'post',
+			'object_subtype' => 'sc_event',
+			'content'        => '',
+			'start_tz'       => '',
+			'end_tz'         => '',
+			'all_day'        => 1,
+		)
+	);
+
+	// Add the event data.
+	sugar_calendar_add_event( $sc_event_data );
+
+}
+
+/**
+ * Delete a Sugar Calendar event if its associated Council Meeting post is trashed.
+ *
+ * @param int $post_id The post ID.
+ */
+function delete_event( $post_id ) {
+
+	// Return early if the trashed post is not of the `council_meeting` type.
+	if ( 'council_meeting' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	// Check for an `sc_event` post that has the permalink as
+	// the value of the `_council_meeting_permalink` meta key.
+	$sc_event_query = new \WP_Query(
+		array(
+			'meta_key'               => '_council_meeting_permalink', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'             => esc_url( get_permalink( $post_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'post_type'              => 'sc_event',
+			'posts_per_page'         => 1,
+			'no_found_rows'          => true,
+			'update_post_term_cache' => false,
+			'fields'                 => 'ids',
+		)
+	);
+
+	// If an `sc_event` post was found, delete it and its data.
+	if ( $sc_event_query->have_posts() ) {
+		while ( $sc_event_query->have_posts() ) {
+			$sc_event_query->the_post();
+
+			$event = sugar_calendar_get_event_by_object( get_the_ID() );
+
+			if ( $event ) {
+				// Delete the `sc_event` post.
+				wp_delete_post( get_the_ID() );
+
+				// Delete the event data.
+				sugar_calendar_delete_event( $event->id );
+			}
+		}
+	}
+}
+
+/**
+ * Redirect Sugar Calendar events generated from Council Meeting posts.
+ */
+function redirect_events() {
+
+	// Return early if this isn't an `sc_event` post.
+	if ( ! is_singular( 'sc_event' ) ) {
+		return;
+	}
+
+	// Get the current post ID.
+	$post_id = get_queried_object_id();
+
+	// Attempt to retrieve a value from the `_council_meeting_permalink` meta key.
+	$permalink = get_post_meta( $post_id, '_council_meeting_permalink', true );
+
+	// Return early if the post has no `_council_meeting_permalink` meta.
+	if ( ! $permalink ) {
+		return;
+	}
+
+	// Redirect to the associated Council Meeting post.
+	wp_safe_redirect( esc_url( $permalink ), 301 );
+
+	exit;
+}
+
+/**
  * Retrieve the current council meeting. If there is no current meeting,
  * retrieve the next upcoming council meeting.
  *
@@ -506,6 +721,145 @@ function render_council_meeting_shortcode( $atts ) {
 
 	<?php
 	$html = ob_get_clean();
+
+	return $html;
+}
+
+/**
+ * Get past council meetings and populate them.
+ */
+function show_past_council_meetings() {
+	$today = time();
+
+	$past_council_meeting_args = array(
+		'post_type'      => 'council_meeting',
+		'post_status'    => 'publish',
+		'posts_per_page' => 200,
+		'order'          => 'DESC',
+		'meta_key'       => 'council_meeting_end_date', // Key to order by.
+		'orderby'        => 'meta_value_num',
+		'meta_query'     => array(
+			array(
+				'key'     => 'council_meeting_end_date',
+				'value'   => $today,
+				'compare' => '<',
+			),
+		),
+	);
+
+	$all_past_council_meetings = new \WP_Query( $past_council_meeting_args );
+
+	if ( $all_past_council_meetings->have_posts() ) {
+		ob_start();
+		while ( $all_past_council_meetings->have_posts() ) {
+			$all_past_council_meetings->the_post();
+			?>
+			<article class="card card--council_meeting">
+				<h2 class="entry-title"><a href="<?php echo esc_html( get_permalink() ); ?>"><?php echo esc_html( get_the_title() ); ?></a></h2>
+
+			<?php
+
+			$location = get_post_meta( get_the_ID(), 'council_meeting_location', true );
+
+			if ( $location ) :
+				?>
+				<p class="block-location"><?php echo esc_html( $location ); ?></p>
+				<?php
+			endif;
+
+			$documents = get_post_meta( get_the_ID(), 'council_meeting_documents', true );
+
+			if ( is_array( $documents ) ) {
+				echo '<ul class="meeting-doc-list">';
+
+				foreach ( $documents as $cnt => $document ) {
+					if ( '' === trim( $document['title'] ) || '' === trim( $document['url'] ) ) {
+						continue;
+					}
+					?>
+						<li class="meeting-doc"><a href="<?php echo esc_url( $document['url'] ); ?>" class=""><?php echo esc_html( $document['title'] ); ?></a></li>
+					<?php
+				}
+				echo '</ul>';
+			}
+
+			?>
+			</article>
+			<?php
+		}
+		$html = ob_get_clean();
+	}
+
+	wp_reset_postdata();
+
+	return $html;
+}
+
+/**
+ * Get future council meetings and populate them.
+ */
+function show_future_council_meetings() {
+	$today = time();
+
+	$future_council_meeting_args = array(
+		'post_type'      => 'council_meeting',
+		'post_status'    => 'publish',
+		'posts_per_page' => 200,
+		'order'          => 'ASC',
+		'meta_key'       => 'council_meeting_end_date', // Key to order by.
+		'orderby'        => 'meta_value_num',
+		'meta_query'     => array(
+			array(
+				'key'     => 'council_meeting_end_date',
+				'value'   => $today,
+				'compare' => '>',
+			),
+		),
+	);
+
+	$all_future_council_meetings = new \WP_Query( $future_council_meeting_args );
+
+	if ( $all_future_council_meetings->have_posts() ) {
+		ob_start();
+		while ( $all_future_council_meetings->have_posts() ) {
+			$all_future_council_meetings->the_post();
+			?>
+			<article class="card card--council_meeting">
+				<h2 class="entry-title"><a href="<?php echo esc_html( get_permalink() ); ?>"><?php echo esc_html( get_the_title() ); ?></a></h2>
+
+			<?php
+			$location = get_post_meta( get_the_ID(), 'council_meeting_location', true );
+
+			if ( $location ) :
+				?>
+				<p class="block-location"><?php echo esc_html( $location ); ?></p>
+				<?php
+			endif;
+
+			$documents = get_post_meta( get_the_ID(), 'council_meeting_documents', true );
+
+			if ( is_array( $documents ) ) {
+				echo '<ul class="meeting-doc-list">';
+
+				foreach ( $documents as $cnt => $document ) {
+					if ( '' === trim( $document['title'] ) || '' === trim( $document['url'] ) ) {
+						continue;
+					}
+					?>
+						<li class="meeting-doc"><a href="<?php echo esc_url( $document['url'] ); ?>" class=""><?php echo esc_html( $document['title'] ); ?></a></li>
+					<?php
+				}
+				echo '</ul>';
+			}
+
+			?>
+			</article>
+			<?php
+		}
+		$html = ob_get_clean();
+	}
+
+	wp_reset_postdata();
 
 	return $html;
 }
