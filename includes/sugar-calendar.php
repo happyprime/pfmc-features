@@ -7,10 +7,33 @@
 
 namespace PFMCFS\SugarCalendar;
 
+add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_post_type_args', 10, 2 );
+add_action( 'init', __NAMESPACE__ . '\register_categories_for_events', 11 );
 add_action( 'after_setup_theme', __NAMESPACE__ . '\remove_default_shortcode_registration' );
 add_action( 'init', __NAMESPACE__ . '\add_shortcodes' );
 add_filter( 'sc_events_query_clauses', __NAMESPACE__ . '\sugar_calendar_join_by_taxonomy_term', 15, 2 );
 add_action( 'sc_parse_events_query', __NAMESPACE__ . '\sugar_calendar_pre_get_events_by_taxonomy', 15 );
+
+/**
+ * Expose the `sc_event` post type in the REST API.
+ *
+ * @param array  $args      Array of arguments for registering a post type.
+ * @param string $post_type Post type key.
+ */
+function filter_post_type_args( $args, $post_type ) {
+	if ( 'sc_event' === $post_type ) {
+		$args['show_in_rest'] = true;
+	}
+
+	return $args;
+}
+
+/**
+ * Register categories for the `sc_event` post type.
+ */
+function register_categories_for_events() {
+	register_taxonomy_for_object_type( 'category', 'sc_event' );
+}
 
 /**
  * Remove the default shortcode registration provided by the Sugar Calendar plugin.
@@ -236,7 +259,7 @@ function get_events_list( $display = 'upcoming', $taxonomies = array(), $number 
 			$end_time   = sc_get_event_end_time( $event_id );
 
 			if ( $event->is_all_day() ) {
-				echo '<span class="sc_event_time">' . esc_html__( 'All-day', 'wp-rig' ) . '</span>';
+				echo '<span class="sc_event_time">' . esc_html__( 'All-day', 'pfmc-feature-set' ) . '</span>';
 			} elseif ( $end_time !== $start_time ) {
 				echo '<span class="sc_event_time">' . esc_html( $start_time ) . '&nbsp;&ndash;&nbsp;' . esc_html( $end_time ) . '</span>';
 			} elseif ( ! empty( $start_time ) ) {
@@ -255,7 +278,7 @@ function get_events_list( $display = 'upcoming', $taxonomies = array(), $number 
 
 		if ( ! empty( $show['link'] ) ) {
 			echo '<a href="' . esc_url( get_permalink( $event_id ) ) . '" class="sc_event_link">';
-			echo esc_html__( 'Read More', 'wp-rig' );
+			echo esc_html__( 'Read More', 'pfmc-feature-set' );
 			echo '</a>';
 		}
 
