@@ -36,3 +36,4 @@ require_once __DIR__ . '/includes/council-meetings.php';
 require_once __DIR__ . '/includes/actions.php';
 require_once __DIR__ . '/includes/shadow-taxonomies.php';
 require_once __DIR__ . '/includes/sugar-calendar.php';
+require_once __DIR__ . '/includes/document-revisions.php';
