@@ -7,7 +7,7 @@
 
 namespace PFMCFS\Post_Type\Managed_Fisheries;
 
-add_action( 'init', __NAMESPACE__ . '\register_post_type', 10, 1 );
+add_action( 'init', __NAMESPACE__ . '\register_post_type', 10 );
 
 /**
  * Register the Managed Fishery post type.

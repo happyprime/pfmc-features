@@ -7,10 +7,10 @@
 
 namespace PFMCFS\Post_Type\Council_Meetings;
 
-add_action( 'init', __NAMESPACE__ . '\register_post_type', 10, 1 );
-add_action( 'save_post', __NAMESPACE__ . '\save_council_meeting_meta', 1 );
+add_action( 'init', __NAMESPACE__ . '\register_post_type', 10 );
+add_action( 'save_post_council_meeting', __NAMESPACE__ . '\save_meta', 1 );
 add_action( 'save_post_council_meeting', __NAMESPACE__ . '\create_event', 10, 2 );
-add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event', 10, 1 );
+add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event', 10 );
 add_action( 'template_redirect', __NAMESPACE__ . '\redirect_events', 10 );
 
 add_shortcode( 'council_meeting', __NAMESPACE__ . '\render_council_meeting_shortcode', 10 );
@@ -213,7 +213,7 @@ function council_meeting_start_date( $post ) {
 
 	// Convert timestamp back to YYYY-MM-DD that the input field expects.
 	if ( '' !== $meeting_start_date ) {
-		$meeting_start_date = date( 'Y-m-d', $meeting_start_date );
+		$meeting_start_date = date( 'Y-m-d', $meeting_start_date ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 	}
 
 	echo '<input type="date" id="council_meeting_start_date" name="council_meeting_start_date" value="' . esc_attr( $meeting_start_date ) . '" />';
@@ -230,7 +230,7 @@ function council_meeting_end_date( $post ) {
 
 	// Convert timestamp back to YYYY-MM-DD that the input field expects.
 	if ( '' !== $meeting_end_date ) {
-		$meeting_end_date = date( 'Y-m-d', $meeting_end_date );
+		$meeting_end_date = date( 'Y-m-d', $meeting_end_date ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 	}
 
 	echo '<input type="date" id="council_meeting_end_date" name="council_meeting_end_date" value="' . esc_attr( $meeting_end_date ) . '" />';
@@ -284,7 +284,8 @@ function council_meeting_documents( $post ) {
  *
  * @param int $post_id The ID of the post.
  */
-function save_council_meeting_meta( $post_id ) {
+function save_meta( $post_id ) {
+
 	// Return if the user doesn't have edit permissions.
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {
 		return;
@@ -298,13 +299,13 @@ function save_council_meeting_meta( $post_id ) {
 
 	// Save the data.
 	if ( isset( $_POST['council_meeting_start_date'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['council_meeting_start_date'] ) ) ) {
-		update_post_meta( $post_id, 'council_meeting_start_date', strtotime( $_POST['council_meeting_start_date'] ) ); // phpcs:ignore
+		update_post_meta( $post_id, 'council_meeting_start_date', strtotime( $_POST['council_meeting_start_date'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	} elseif ( isset( $_POST['council_meeting_start_date'] ) ) {
 		delete_post_meta( $post_id, 'council_meeting_start_date' );
 	}
 
 	if ( isset( $_POST['council_meeting_end_date'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['council_meeting_end_date'] ) ) ) {
-		update_post_meta($post_id, 'council_meeting_end_date', strtotime( $_POST['council_meeting_end_date'] ) ); // phpcs:ignore
+		update_post_meta( $post_id, 'council_meeting_end_date', strtotime( $_POST['council_meeting_end_date'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	} elseif ( isset( $_POST['council_meeting_end_date'] ) ) {
 		delete_post_meta( $post_id, 'council_meeting_end_date' );
 	}
@@ -317,7 +318,7 @@ function save_council_meeting_meta( $post_id ) {
 
 	if ( isset( $_POST['council_meeting_documents'] ) && is_array( $_POST['council_meeting_documents'] ) ) {
 		$store_documents = array();
-		foreach ($_POST['council_meeting_documents'] as $document) { // phpcs:ignore
+		foreach ( $_POST['council_meeting_documents'] as $document ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$title = '';
 			$url   = '';
 
@@ -383,7 +384,7 @@ function create_event( $post_id, $post ) {
 	// Get the Council Meeting post data that we'll be using.
 	$permalink = esc_url( get_permalink( $post_id ) );
 	$title     = wp_strip_all_tags( $post->post_title );
-	$location  = sanitize_text_field( wp_unslash( $_POST['council_meeting_location'] ) );
+	$location  = ( isset( $_POST['council_meeting_location'] ) ) ? sanitize_text_field( wp_unslash( $_POST['council_meeting_location'] ) ) : '';
 	$start     = sanitize_text_field( wp_unslash( $_POST['council_meeting_start_date'] . ' 00:00:00' ) );
 	$end       = sanitize_text_field( wp_unslash( $_POST['council_meeting_end_date'] . ' 00:00:00' ) );
 
@@ -562,9 +563,9 @@ function get_current_council_meeting() {
 		'post_status'    => 'publish',
 		'posts_per_page' => 1,
 		'order'          => 'ASC',
-		'meta_key'       => 'council_meeting_start_date', // Key to order by.
+		'meta_key'       => 'council_meeting_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		'orderby'        => 'meta_value_num',
-		'meta_query'     => array(
+		'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			array(
 				'key'     => 'council_meeting_start_date',
 				'value'   => $today,
@@ -583,7 +584,7 @@ function get_current_council_meeting() {
 	if ( 0 === count( $council_meetings ) ) {
 		$upcoming_meeting_args = $current_meeting_args;
 
-		$upcoming_meeting_args['meta_query'] = array(
+		$upcoming_meeting_args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			array(
 				'key'     => 'council_meeting_start_date',
 				'value'   => $today,
@@ -615,9 +616,9 @@ function get_past_council_meeting() {
 		'post_status'    => 'publish',
 		'posts_per_page' => 1,
 		'order'          => 'DESC',
-		'meta_key'       => 'council_meeting_end_date', // Key to order by.
+		'meta_key'       => 'council_meeting_end_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		'orderby'        => 'meta_value_num',
-		'meta_query'     => array(
+		'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			array(
 				'key'     => 'council_meeting_end_date',
 				'value'   => $today,
@@ -685,9 +686,9 @@ function render_council_meeting_shortcode( $atts ) {
 	<div class="block-box">
 		<h2 class="block-box-head"><?php echo esc_html( $title ); ?></h2>
 		<div class="council-meeting-box">
-			<div class="wp-block-button is-style-arrow-link cm-link"><a href="<?php echo esc_url( $meeting_url ); ?>"><?php echo esc_html( date( 'F', $start_date ) ); ?> council meeting</a></div>
+			<div class="wp-block-button is-style-arrow-link cm-link"><a href="<?php echo esc_url( $meeting_url ); ?>"><?php echo esc_html( date( 'F', $start_date ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date ?> council meeting</a></div>
 
-			<datetime class="block-date"><?php echo esc_html( date( 'M j', $start_date ) ) . '&ndash;' . esc_html( date( 'j, Y', $end_date ) ); ?></datetime>
+			<datetime class="block-date"><?php echo esc_html( date( 'M j', $start_date ) ) . '&ndash;' . esc_html( date( 'j, Y', $end_date ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date ?></datetime>
 
 			<?php if ( $location ) : ?>
 				<p class="block-location"><?php echo esc_html( $location ); ?></p>
@@ -734,11 +735,11 @@ function show_past_council_meetings() {
 	$past_council_meeting_args = array(
 		'post_type'      => 'council_meeting',
 		'post_status'    => 'publish',
-		'posts_per_page' => 200,
+		'posts_per_page' => 200, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
 		'order'          => 'DESC',
-		'meta_key'       => 'council_meeting_end_date', // Key to order by.
+		'meta_key'       => 'council_meeting_end_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		'orderby'        => 'meta_value_num',
-		'meta_query'     => array(
+		'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			array(
 				'key'     => 'council_meeting_end_date',
 				'value'   => $today,
@@ -804,11 +805,11 @@ function show_future_council_meetings() {
 	$future_council_meeting_args = array(
 		'post_type'      => 'council_meeting',
 		'post_status'    => 'publish',
-		'posts_per_page' => 200,
+		'posts_per_page' => 200, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
 		'order'          => 'ASC',
-		'meta_key'       => 'council_meeting_end_date', // Key to order by.
+		'meta_key'       => 'council_meeting_end_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		'orderby'        => 'meta_value_num',
-		'meta_query'     => array(
+		'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			array(
 				'key'     => 'council_meeting_end_date',
 				'value'   => $today,

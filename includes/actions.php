@@ -7,7 +7,7 @@
 
 namespace PFMCFS\Post_Type\Actions;
 
-add_action( 'init', __NAMESPACE__ . '\register_post_type', 10, 1 );
+add_action( 'init', __NAMESPACE__ . '\register_post_type', 10 );
 add_action( 'init', __NAMESPACE__ . '\register_taxonomies', 10 );
 
 /**
