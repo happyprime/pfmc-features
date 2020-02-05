@@ -2,8 +2,8 @@
 
 namespace PFMCFS\Media;
 
-add_filter( 'mime_types', __NAMESPACE__ . '\xlsm_mime_fix' );
-add_filter( 'upload_mimes', __NAMESPACE__ . '\allow_upload_xlsm_mime' );
+add_filter( 'mime_types', __NAMESPACE__ . '\filter_mime_types' );
+add_filter( 'upload_mimes', __NAMESPACE__ . '\filter_upload_mimes' );
 
 /**
  * Adjust the mime type expected from xlsm files from application/vnd.ms-excel.sheet.macroEnabled.12,
@@ -12,7 +12,7 @@ add_filter( 'upload_mimes', __NAMESPACE__ . '\allow_upload_xlsm_mime' );
  * @param array $mimes A list of known mime types.
  * @return array A modified list of known mime types.
  */
-function xlsm_mime_fix( $mimes ) {
+function filter_mime_types( $mimes ) {
 	$mimes['xlsm'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 	return $mimes;
 }
@@ -24,7 +24,7 @@ function xlsm_mime_fix( $mimes ) {
  * @param array $existing_mimes List of existing mime types.
  * @return array Modified list of existing mime types.
  */
-function allow_upload_xlsm_mime( $existing_mimes ) {
+function filter_upload_mimes( $existing_mimes ) {
 	$existing_mimes['xlsm'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 	return $existing_mimes;
 }
