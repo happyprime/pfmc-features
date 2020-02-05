@@ -24,7 +24,7 @@ function xlsm_mime_fix( $mimes ) {
  * @param array $existing_mimes List of existing mime types.
  * @return array Modified list of existing mime types.
  */
-function allow_upload_xlsm_mime( $existing_mimes = array() ) {
+function allow_upload_xlsm_mime( $existing_mimes ) {
 	$existing_mimes['xlsm'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 	return $existing_mimes;
 }
