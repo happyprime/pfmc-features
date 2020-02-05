@@ -15,6 +15,7 @@ add_filter( 'sc_events_query_clauses', __NAMESPACE__ . '\sugar_calendar_join_by_
 add_action( 'sc_parse_events_query', __NAMESPACE__ . '\sugar_calendar_pre_get_events_by_taxonomy', 15 );
 add_action( 'save_post_sc_event', __NAMESPACE__ . '\generate_post', 10, 2 );
 add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event_generated_post', 10 );
+add_action( 'template_redirect', __NAMESPACE__ . '\redirect_event_generated_posts', 10 );
 
 /**
  * Expose the `sc_event` post type in the REST API.
@@ -500,4 +501,31 @@ function delete_event_generated_post( $post_id ) {
 			wp_delete_post( get_the_ID() );
 		}
 	}
+}
+
+/**
+ * Redirects posts generated from Sugar Calendar events to the event.
+ */
+function redirect_event_generated_posts() {
+
+	// Return early if this isn't a post.
+	if ( ! is_single() ) {
+		return;
+	}
+
+	// Get the current post ID.
+	$post_id = get_queried_object_id();
+
+	// Attempt to retrieve a value from the `_sc_event_permalink` meta key.
+	$permalink = get_post_meta( $post_id, '_sc_event_permalink', true );
+
+	// Return early if the post has no `_sc_event_permalink` meta.
+	if ( ! $permalink ) {
+		return;
+	}
+
+	// Redirect to the associated Sugar Calendar event post.
+	wp_safe_redirect( esc_url( $permalink ), 301 );
+
+	exit;
 }
