@@ -392,7 +392,7 @@ function sugar_calendar_join_by_taxonomy_term( $clauses = array(), $query = fals
 }
 
 /**
- * Adds a meta box for managing post staleness.
+ * Adds a meta box for managing post generation/updates.
  */
 function add_meta_boxes() {
 	add_meta_box(
