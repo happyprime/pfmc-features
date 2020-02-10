@@ -427,6 +427,7 @@ function display_event_to_post_meta_box( $post ) {
 			?>
 			</p>
 			<p><?php esc_html_e( "Changes made to Details field will sync to the post's excerpt.", 'pfmc-feature-set' ); ?></p>
+			<input type="hidden" name="_pfmcfs_event_to_post" value="1" />
 		<?php
 	else :
 		?>
