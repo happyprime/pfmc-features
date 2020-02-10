@@ -426,7 +426,7 @@ function display_event_to_post_meta_box( $post ) {
 				);
 			?>
 			</p>
-			<p><?php esc_html_e( "Changes made to Details field will sync to the post's excerpt.", 'pfmc-feature-set' ); ?></p>
+			<p><?php printf( wp_kses_post( __( 'Changes made to the <em>Details</em> field will sync to the post excerpt. <em>Categories</em> and <em>Managed Fisheries Connect</em> term changes will also sync to the post.', 'pfmc-feature-set' ) ) ); ?></p>
 			<input type="hidden" name="_pfmcfs_event_to_post" value="1" />
 		<?php
 	else :
@@ -439,6 +439,7 @@ function display_event_to_post_meta_box( $post ) {
 				>
 				<label for="pfmcfs-event-to-post"><?php esc_html_e( 'Generate a post from this event', 'pfmc-feature-set' ); ?></label>
 			</p>
+			<p><?php printf( wp_kses_post( __( 'The <em>Details</em> field will populate the post excerpt. Selected <em>Categories</em> and <em>Managed Fisheries Connect</em> terms will also be applied to the post.', 'pfmc-feature-set' ) ) ); ?></p>
 		<?php
 	endif;
 }
