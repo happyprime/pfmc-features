@@ -686,7 +686,7 @@ function render_council_meeting_shortcode( $atts ) {
 	<div class="block-box">
 		<h2 class="block-box-head"><?php echo esc_html( $title ); ?></h2>
 		<div class="council-meeting-box">
-			<div class="wp-block-button is-style-arrow-link cm-link"><a href="<?php echo esc_url( $meeting_url ); ?>"><?php echo esc_html( date( 'F', $start_date ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date ?> council meeting</a></div>
+			<div class="wp-block-button is-style-arrow-link cm-link"><a href="<?php echo esc_url( $meeting_url ); ?>"><?php echo esc_html( date( 'F', $start_date ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date ?> Council meeting</a></div>
 
 			<datetime class="block-date"><?php echo esc_html( date( 'M j', $start_date ) ) . '&ndash;' . esc_html( date( 'j, Y', $end_date ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date ?></datetime>
 
