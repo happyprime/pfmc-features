@@ -9,7 +9,7 @@ namespace PFMCFS\Alert;
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type', 10 );
 add_action( 'save_post_alert', __NAMESPACE__ . '\save_post_meta', 10, 2 );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts', 10 );
+add_action( 'wp_body_open', __NAMESPACE__ . '\display_alert_bar', 10 );
 
 /**
  * Register the Alert post type.
@@ -203,9 +203,9 @@ function save_post_meta( $post_id, $post ) {
 }
 
 /**
- * Enqueues the JavaScript for displaying an alert.
+ * Outputs the alert bar markup.
  */
-function enqueue_scripts() {
+function display_alert_bar() {
 
 	// Return early if this is an alert post.
 	if ( is_singular( 'alert' ) ) {
@@ -273,17 +273,13 @@ function enqueue_scripts() {
 		return;
 	}
 
-	wp_enqueue_script(
-		'pfmcfs-alert',
-		WP_PLUGIN_URL . '/pfmc-feature-set/js/alert.js',
-		array(),
-		pfmc_feature_set_version(),
-		true
-	);
+	$classes  = 'pfmc-alert';
+	$classes .= ' ' . $alert_data['level'];
 
-	wp_localize_script(
-		'pfmcfs-alert',
-		'pfmcfsAlertData',
-		$alert_data
-	);
+	?>
+	<div class="<?php echo esc_attr( $classes ); ?>">
+		<h1><?php echo esc_attr( $alert_data['heading'] ); ?></h1>
+		<p><a href="<?php echo esc_url( $alert_data['url'] ); ?>"><?php echo wp_kses_post( $alert_data['content'] ); ?></a></p>
+	</div>
+	<?php
 }
