@@ -9,6 +9,7 @@ namespace PFMCFS\Alert;
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type', 10 );
 add_action( 'save_post_alert', __NAMESPACE__ . '\save_post_meta', 10, 2 );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts', 10 );
 
 /**
  * Register the Alert post type.
@@ -157,4 +158,62 @@ function save_post_meta( $post_id, $post ) {
 	if ( isset( $_POST['_pfmcfs_alert_display_until'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_until'] ) ) ) {
 		update_post_meta( $post_id, '_pfmcfs_alert_display_until', sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_until'] ) ) );
 	}
+}
+
+/**
+ * Enqueues the JavaScript for displaying an alert.
+ */
+function enqueue_scripts() {
+
+	$alert_data = array();
+
+	$alert_query = new \WP_Query(
+		array(
+			'post_type'  => 'alert',
+			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				array(
+					'key'     => '_pfmcfs_alert_display_until',
+					'value'   => date_i18n( 'Y-m-d\TH:i' ),
+					'compare' => '>',
+					'type'    => 'DATETIME',
+				),
+			),
+		)
+	);
+
+	if ( $alert_query->have_posts() ) {
+		while ( $alert_query->have_posts() ) {
+			$alert_query->the_post();
+				$alert_data['heading'] = get_the_title();
+				$alert_data['content'] = get_the_excerpt();
+				$alert_data['level']   = get_post_meta( get_the_ID(), '_pfmcfs_alert_level', true );
+				$alert_data['url']     = get_the_permalink();
+		}
+	}
+
+	wp_reset_postdata();
+
+	// Return early if there is no alert data.
+	if ( empty( $alert_data ) ) {
+		return;
+	}
+
+	// Low level alerts should display only on the home page.
+	if ( 'low' === $alert_data['level'] && ! is_front_page() ) {
+		return;
+	}
+
+	wp_enqueue_script(
+		'pfmcfs-alert',
+		WP_PLUGIN_URL . '/pfmc-feature-set/js/alert.js',
+		array(),
+		pfmc_feature_set_version(),
+		true
+	);
+
+	wp_localize_script(
+		'pfmcfs-alert',
+		'pfmcfsAlertData',
+		$alert_data
+	);
 }
