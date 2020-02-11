@@ -86,14 +86,14 @@ function get_today() {
 /**
  * Returns the time until transient expiration in seconds.
  *
- * @param string $display_until Date until which the alert should be shown.
- * @return int Seconds until trasient expiration.
+ * @param string $display_through Date through which the alert should be shown.
+ * @return int Seconds through trasient expiration.
  */
-function get_expiration( $display_until ) {
-	$today = strtotime( get_today()->format( 'Y-m-d H:i' ) );
-	$until = strtotime( $display_until );
+function get_expiration( $display_through ) {
+	$today   = strtotime( get_today()->format( 'Y-m-d' ) );
+	$through = strtotime( $display_through );
 
-	return $until - $today;
+	return $through - $today;
 }
 
 /**
@@ -105,14 +105,14 @@ function display_alert_meta_box( $post ) {
 	wp_nonce_field( 'pfmcfs_check_alert', 'pfmcfs_alert_nonce' );
 
 	// Get existing meta values.
-	$level = get_post_meta( $post->ID, '_pfmcfs_alert_level', true );
-	$until = get_post_meta( $post->ID, '_pfmcfs_alert_display_until', true );
+	$level   = get_post_meta( $post->ID, '_pfmcfs_alert_level', true );
+	$through = get_post_meta( $post->ID, '_pfmcfs_alert_display_through', true );
 
 	// Set `low` as the default alert level.
 	$level = ( $level ) ? $level : 'low';
 
-	// Set the default until value as one day from now.
-	$until = ( $until ) ? $until : get_today()->modify( '+1 day' )->format( 'Y-m-d\TH:i' );
+	// Set the default "Display alert through" value as one day from now.
+	$through = ( $through ) ? $through : get_today()->modify( '+1 day' )->format( 'Y-m-d' );
 
 	?>
 	<p><?php esc_html_e( 'Alert level', 'pfmc-feature-set' ); ?></p>
@@ -135,13 +135,13 @@ function display_alert_meta_box( $post ) {
 
 	?>
 	<p>
-		<label for="pfmcfs-alert_display-until"><?php esc_html_e( 'Display alert until', 'pfmc-feature-set' ); ?></label>
+		<label for="pfmcfs-alert_display-through"><?php esc_html_e( 'Display alert through', 'pfmc-feature-set' ); ?></label>
 		<input
-			type="datetime-local"
-			id="pfmcfs-alert_display-until"
-			name="_pfmcfs_alert_display_until"
-			value="<?php echo esc_attr( $until ); ?>"
-			min="<?php echo esc_attr( $until_default ); ?>"
+			type="date"
+			id="pfmcfs-alert_display-through"
+			name="_pfmcfs_alert_display_through"
+			value="<?php echo esc_attr( $through ); ?>"
+			min="<?php echo esc_attr( $through_default ); ?>"
 		/>
 	</p>
 	<?php
@@ -190,13 +190,13 @@ function save_post_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_pfmcfs_alert_level', $level );
 	}
 
-	if ( isset( $_POST['_pfmcfs_alert_display_until'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_until'] ) ) ) {
-		$display_until = sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_until'] ) );
+	if ( isset( $_POST['_pfmcfs_alert_display_through'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_through'] ) ) ) {
+		$display_through = sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_through'] ) );
 
 		// Overwrite the expiration for the transient.
-		$expiration = get_expiration( $display_until );
+		$expiration = get_expiration( $display_through );
 
-		update_post_meta( $post_id, '_pfmcfs_alert_display_until', $display_until );
+		update_post_meta( $post_id, '_pfmcfs_alert_display_through', $display_through );
 	}
 
 	set_transient( 'pfmc_alert_data', $alert_data, $expiration );
@@ -223,7 +223,7 @@ function display_alert_bar() {
 		// Set up the initial expiration for the transient (none by default).
 		$expiration = 0;
 
-		// Query for an alert post with a `_pfmcfs_alert_display_until`
+		// Query for an alert post with a `_pfmcfs_alert_display_through`
 		// value greater than the current date/time.
 		$alert_query = new \WP_Query(
 			array(
@@ -231,10 +231,10 @@ function display_alert_bar() {
 				'posts_per_page' => 1,
 				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
-						'key'     => '_pfmcfs_alert_display_until',
-						'value'   => date_i18n( 'Y-m-d\TH:i' ),
+						'key'     => '_pfmcfs_alert_display_through',
+						'value'   => date_i18n( 'Y-m-d' ),
 						'compare' => '>',
-						'type'    => 'DATETIME',
+						'type'    => 'DATE',
 					),
 				),
 			)
@@ -253,8 +253,8 @@ function display_alert_bar() {
 				);
 
 				// Overwrite the expiration for the transient.
-				$display_until = get_post_meta( get_the_ID(), '_pfmcfs_alert_display_until', true );
-				$expiration    = get_expiration( $display_until );
+				$display_through = get_post_meta( get_the_ID(), '_pfmcfs_alert_display_through', true );
+				$expiration      = get_expiration( $display_through );
 			}
 		}
 
