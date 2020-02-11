@@ -72,6 +72,31 @@ function get_alert_level_fields() {
 }
 
 /**
+ * Returns the current date and time.
+ *
+ * @return object Current date and time.
+ */
+function get_today() {
+	$timezone = get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : 'UTC';
+	$timezone = new \DateTimeZone( $timezone );
+
+	return new \DateTime( 'now', $timezone );
+}
+
+/**
+ * Returns the time until transient expiration in seconds.
+ *
+ * @param string $display_until Date until which the alert should be shown.
+ * @return int Seconds until trasient expiration.
+ */
+function get_expiration( $display_until ) {
+	$today = strtotime( get_today()->format( 'Y-m-d H:i' ) );
+	$until = strtotime( $display_until );
+
+	return $until - $today;
+}
+
+/**
  * Displays a meta box used to manage alert level and display duration.
  *
  * @param \WP_Post $post The post object.
@@ -87,12 +112,7 @@ function display_alert_meta_box( $post ) {
 	$level = ( $level ) ? $level : 'low';
 
 	// Set the default until value as one day from now.
-	if ( ! $until ) {
-		$timezone = get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : 'UTC';
-		$timezone = new \DateTimeZone( $timezone );
-		$today    = new \DateTime( null, $timezone );
-		$until    = $today->modify( '+1 day' )->format( 'Y-m-d\TH:i' );
-	}
+	$until = ( $until ) ? $until : get_today()->modify( '+1 day' )->format( 'Y-m-d\TH:i' );
 
 	?>
 	<p><?php esc_html_e( 'Alert level', 'pfmc-feature-set' ); ?></p>
@@ -151,13 +171,35 @@ function save_post_meta( $post_id, $post ) {
 		return;
 	}
 
+	// Set up intial data to store in a transient.
+	$alert_data = array(
+		'heading' => $post->post_title,
+		'content' => $post->post_excerpt,
+		'url'     => get_the_permalink( $post_id ),
+	);
+
+	// Set up the initial expiration for the transient (none by default).
+	$expiration = 0;
+
 	if ( isset( $_POST['_pfmcfs_alert_level'] ) && in_array( $_POST['_pfmcfs_alert_level'], array_keys( get_alert_level_fields() ), true ) ) {
-		update_post_meta( $post_id, '_pfmcfs_alert_level', sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_level'] ) ) );
+		$level = sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_level'] ) );
+
+		// Add the alert level to the transient data.
+		$alert_data['level'] = $level;
+
+		update_post_meta( $post_id, '_pfmcfs_alert_level', $level );
 	}
 
 	if ( isset( $_POST['_pfmcfs_alert_display_until'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_until'] ) ) ) {
-		update_post_meta( $post_id, '_pfmcfs_alert_display_until', sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_until'] ) ) );
+		$display_until = sanitize_text_field( wp_unslash( $_POST['_pfmcfs_alert_display_until'] ) );
+
+		// Overwrite the expiration for the transient.
+		$expiration = get_expiration( $display_until );
+
+		update_post_meta( $post_id, '_pfmcfs_alert_display_until', $display_until );
 	}
+
+	set_transient( 'pfmc_alert_data', $alert_data, $expiration );
 }
 
 /**
@@ -165,36 +207,59 @@ function save_post_meta( $post_id, $post ) {
  */
 function enqueue_scripts() {
 
-	$alert_data = array();
+	$alert_data = get_transient( 'pfmc_alert_data' );
 
-	$alert_query = new \WP_Query(
-		array(
-			'post_type'  => 'alert',
-			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				array(
-					'key'     => '_pfmcfs_alert_display_until',
-					'value'   => date_i18n( 'Y-m-d\TH:i' ),
-					'compare' => '>',
-					'type'    => 'DATETIME',
+	// Query for an alert post if no transient data is available.
+	if ( ! $alert_data ) {
+
+		// Set up intial data to store in a transient.
+		$alert_data = 'no alert';
+
+		// Set up the initial expiration for the transient (none by default).
+		$expiration = 0;
+
+		// Query for an alert post with a `_pfmcfs_alert_display_until`
+		// value greater than the current date/time.
+		$alert_query = new \WP_Query(
+			array(
+				'post_type'      => 'alert',
+				'posts_per_page' => 1,
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_pfmcfs_alert_display_until',
+						'value'   => date_i18n( 'Y-m-d\TH:i' ),
+						'compare' => '>',
+						'type'    => 'DATETIME',
+					),
 				),
-			),
-		)
-	);
+			)
+		);
 
-	if ( $alert_query->have_posts() ) {
-		while ( $alert_query->have_posts() ) {
-			$alert_query->the_post();
-				$alert_data['heading'] = get_the_title();
-				$alert_data['content'] = get_the_excerpt();
-				$alert_data['level']   = get_post_meta( get_the_ID(), '_pfmcfs_alert_level', true );
-				$alert_data['url']     = get_the_permalink();
+		if ( $alert_query->have_posts() ) {
+			while ( $alert_query->have_posts() ) {
+				$alert_query->the_post();
+
+				// Overwrite the data to store in the transient and make available to the script.
+				$alert_data = array(
+					'heading' => get_the_title(),
+					'content' => get_the_excerpt(),
+					'level'   => get_post_meta( get_the_ID(), '_pfmcfs_alert_level', true ),
+					'url'     => get_the_permalink(),
+				);
+
+				// Overwrite the expiration for the transient.
+				$display_until = get_post_meta( get_the_ID(), '_pfmcfs_alert_display_until', true );
+				$expiration    = get_expiration( $display_until );
+			}
 		}
+
+		wp_reset_postdata();
+
+		set_transient( 'pfmc_alert_data', $alert_data, $expiration );
 	}
 
-	wp_reset_postdata();
-
 	// Return early if there is no alert data.
-	if ( empty( $alert_data ) ) {
+	if ( 'no alert' === $alert_data ) {
 		return;
 	}
 
