@@ -28,7 +28,7 @@ function register_post_type() {
 		'exclude_from_search'  => true,
 		'show_in_nav_menus'    => false,
 		'show_in_rest'         => true,
-		'menu_position'        => 25,
+		'menu_position'        => 30,
 		'menu_icon'            => 'dashicons-warning',
 		'supports'             => array(
 			'title',
