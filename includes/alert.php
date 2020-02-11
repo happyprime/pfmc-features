@@ -207,6 +207,11 @@ function save_post_meta( $post_id, $post ) {
  */
 function enqueue_scripts() {
 
+	// Return early if this is an alert post.
+	if ( is_singular( 'alert' ) ) {
+		return;
+	}
+
 	$alert_data = get_transient( 'pfmc_alert_data' );
 
 	// Query for an alert post if no transient data is available.
