@@ -167,6 +167,7 @@ function save_post_meta( $post_id, $post ) {
 		|| ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 		|| wp_is_post_revision( $post_id )
 		|| ( ! isset( $_POST['pfmcfs_alert_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pfmcfs_alert_nonce'] ) ), 'pfmcfs_check_alert' ) )
+		|| 'publish' !== $post->post_status
 	) {
 		return;
 	}
