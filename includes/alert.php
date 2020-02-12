@@ -155,12 +155,6 @@ function display_alert_meta_box( $post ) {
  */
 function save_post_meta( $post_id, $post ) {
 
-	// This is temporary and should eventually be removed.
-	if ( 'publish' !== $post->post_status ) {
-		set_transient( 'pfmc_alert_data', 'no alert', 0 );
-		return;
-	}
-
 	/**
 	 * Return early if:
 	 *     the user doesn't have edit permissions;
@@ -206,7 +200,7 @@ function save_post_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_pfmcfs_alert_display_through', $display_through );
 	}
 
-	set_transient( 'pfmc_alert_data', $alert_data, $expiration );
+	set_transient( get_pfmc_alert_transient_key(), $alert_data, $expiration );
 }
 
 /**
@@ -219,7 +213,7 @@ function display_alert_bar() {
 		return;
 	}
 
-	$alert_data = get_transient( 'pfmc_alert_data' );
+	$alert_data = get_transient( get_pfmc_alert_transient_key() );
 
 	// Query for an alert post if no transient data is available.
 	if ( ! $alert_data ) {
@@ -267,7 +261,7 @@ function display_alert_bar() {
 
 		wp_reset_postdata();
 
-		set_transient( 'pfmc_alert_data', $alert_data, $expiration );
+		set_transient( get_pfmc_alert_transient_key(), $alert_data, $expiration );
 	}
 
 	// Return early if there is no alert data.

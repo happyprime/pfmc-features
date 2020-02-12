@@ -32,10 +32,12 @@ if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
 }
 
 /**
- * Provides a plugin version for use in cache busting.
+ * Provides a versioned transient key for getting and setting alert data.
+ *
+ * @return string Current alert transient key.
  */
-function pfmc_feature_set_version() {
-	return '0.1.0';
+function get_pfmc_alert_transient_key() {
+	return 'pfmc_alert_data_001';
 }
 
 require_once __DIR__ . '/includes/managed-fisheries.php';
