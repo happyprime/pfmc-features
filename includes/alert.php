@@ -155,6 +155,12 @@ function display_alert_meta_box( $post ) {
  */
 function save_post_meta( $post_id, $post ) {
 
+	// This is temporary and should eventually be removed.
+	if ( 'publish' !== $post->post_status ) {
+		set_transient( 'pfmc_alert_data', 'no alert', 0 );
+		return;
+	}
+
 	/**
 	 * Return early if:
 	 *     the user doesn't have edit permissions;
