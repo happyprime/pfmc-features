@@ -31,6 +31,13 @@ if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
 	return;
 }
 
+/**
+ * Provides a plugin version for use in cache busting.
+ */
+function pfmc_feature_set_version() {
+	return '0.1.0';
+}
+
 require_once __DIR__ . '/includes/managed-fisheries.php';
 require_once __DIR__ . '/includes/council-meetings.php';
 require_once __DIR__ . '/includes/actions.php';
@@ -38,3 +45,4 @@ require_once __DIR__ . '/includes/shadow-taxonomies.php';
 require_once __DIR__ . '/includes/sugar-calendar.php';
 require_once __DIR__ . '/includes/document-revisions.php';
 require_once __DIR__ . '/includes/media.php';
+require_once __DIR__ . '/includes/alert.php';
