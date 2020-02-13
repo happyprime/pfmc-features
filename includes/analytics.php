@@ -16,7 +16,7 @@ function add_ga_tracker() {
 
 	?>
 	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-25661802-1"></script>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-69021927-1"></script>
 	<script>
   		window.dataLayer = window.dataLayer || [];
   		function gtag(){dataLayer.push(arguments);}
