@@ -48,3 +48,4 @@ require_once __DIR__ . '/includes/sugar-calendar.php';
 require_once __DIR__ . '/includes/document-revisions.php';
 require_once __DIR__ . '/includes/media.php';
 require_once __DIR__ . '/includes/alert.php';
+require_once __DIR__ . '/includes/analytics.php';
