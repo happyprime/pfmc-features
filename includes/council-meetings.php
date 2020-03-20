@@ -800,6 +800,8 @@ function show_past_council_meetings() {
 			<?php
 		}
 		$html = ob_get_clean();
+	} else {
+		$html = '';
 	}
 
 	wp_reset_postdata();
@@ -869,6 +871,8 @@ function show_future_council_meetings() {
 			<?php
 		}
 		$html = ob_get_clean();
+	} else {
+		$html = '';
 	}
 
 	wp_reset_postdata();
