@@ -305,7 +305,7 @@ function save_meta( $post_id ) {
 	}
 
 	if ( isset( $_POST['council_meeting_end_date'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['council_meeting_end_date'] ) ) ) {
-		update_post_meta( $post_id, 'council_meeting_end_date', strtotime( $_POST['council_meeting_end_date'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		update_post_meta( $post_id, 'council_meeting_end_date', strtotime( $_POST['council_meeting_end_date'] . ' 23:59:59' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	} elseif ( isset( $_POST['council_meeting_end_date'] ) ) {
 		delete_post_meta( $post_id, 'council_meeting_end_date' );
 	}
