@@ -9,6 +9,7 @@ namespace PFMCFS\Alert;
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type', 10 );
 add_action( 'save_post_alert', __NAMESPACE__ . '\save_post_meta', 10, 2 );
+add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_alert_transient', 10 );
 add_action( 'wp_body_open', __NAMESPACE__ . '\display_alert_bar', 10 );
 
 /**
@@ -111,6 +112,9 @@ function display_alert_meta_box( $post ) {
 	// Set `low` as the default alert level.
 	$level = ( $level ) ? $level : 'low';
 
+	// Set the default minimum as today.
+	$through_default = get_today()->format( 'Y-m-d' );
+
 	// Set the default "Display alert through" value as one day from now.
 	$through = ( $through ) ? $through : get_today()->modify( '+1 day' )->format( 'Y-m-d' );
 
@@ -201,6 +205,17 @@ function save_post_meta( $post_id, $post ) {
 	}
 
 	set_transient( get_pfmc_alert_transient_key(), $alert_data, $expiration );
+}
+
+/**
+ * Clear the alert transient when an alert post is trashed.
+ *
+ * @param int $post_id The post ID.
+ */
+function delete_alert_transient( $post_id ) {
+	if ( 'alert' === get_post_type( $post_id ) ) {
+		delete_transient( get_pfmc_alert_transient_key() );
+	}
 }
 
 /**
