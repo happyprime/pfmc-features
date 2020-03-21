@@ -73,25 +73,13 @@ function get_alert_level_fields() {
 }
 
 /**
- * Returns the current date and time.
- *
- * @return object Current date and time.
- */
-function get_today() {
-	$timezone = get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : 'UTC';
-	$timezone = new \DateTimeZone( $timezone );
-
-	return new \DateTime( 'now', $timezone );
-}
-
-/**
  * Returns the time until transient expiration in seconds.
  *
  * @param string $display_through Date through which the alert should be shown.
  * @return int Seconds through trasient expiration.
  */
 function get_expiration( $display_through ) {
-	$today   = strtotime( get_today()->format( 'Y-m-d' ) );
+	$today   = strtotime( gmdate( 'Y-m-d' ) );
 	$through = strtotime( $display_through );
 
 	return $through - $today;
@@ -113,10 +101,10 @@ function display_alert_meta_box( $post ) {
 	$level = ( $level ) ? $level : 'low';
 
 	// Set the default minimum as today.
-	$through_default = get_today()->format( 'Y-m-d' );
+	$through_default = gmdate( 'Y-m-d' );
 
 	// Set the default "Display alert through" value as one day from now.
-	$through = ( $through ) ? $through : get_today()->modify( '+1 day' )->format( 'Y-m-d' );
+	$through = ( $through ) ? $through : gmdate( 'Y-m-d', strtotime( '+1 day' ) );
 
 	?>
 	<p><?php esc_html_e( 'Alert level', 'pfmc-feature-set' ); ?></p>
@@ -248,7 +236,7 @@ function display_alert_bar() {
 				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => '_pfmcfs_alert_display_through',
-						'value'   => date_i18n( 'Y-m-d' ),
+						'value'   => gmdate( 'Y-m-d' ),
 						'compare' => '>',
 						'type'    => 'DATE',
 					),

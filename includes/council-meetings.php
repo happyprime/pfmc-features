@@ -299,19 +299,30 @@ function save_meta( $post_id ) {
 
 	// Save the data.
 	if ( isset( $_POST['council_meeting_start_date'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['council_meeting_start_date'] ) ) ) {
-		update_post_meta( $post_id, 'council_meeting_start_date', strtotime( $_POST['council_meeting_start_date'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// Sanitize the start date, then parse into a timestamp.
+		$start_date = sanitize_text_field( wp_unslash( $_POST['council_meeting_start_date'] ) );
+		$start_date = strtotime( $start_date );
+
+		update_post_meta( $post_id, 'council_meeting_start_date', $start_date );
 	} elseif ( isset( $_POST['council_meeting_start_date'] ) ) {
 		delete_post_meta( $post_id, 'council_meeting_start_date' );
 	}
 
 	if ( isset( $_POST['council_meeting_end_date'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['council_meeting_end_date'] ) ) ) {
-		update_post_meta( $post_id, 'council_meeting_end_date', strtotime( $_POST['council_meeting_end_date'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// Sanitize the end date, then parse into a timestamp
+		// with a manually-added end-of-day time.
+		$end_date = sanitize_text_field( wp_unslash( $_POST['council_meeting_end_date'] ) );
+		$end_date = strtotime( $end_date . ' 23:59:59' );
+
+		update_post_meta( $post_id, 'council_meeting_end_date', $end_date );
 	} elseif ( isset( $_POST['council_meeting_end_date'] ) ) {
 		delete_post_meta( $post_id, 'council_meeting_end_date' );
 	}
 
 	if ( isset( $_POST['council_meeting_location'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['council_meeting_location'] ) ) ) {
-		update_post_meta( $post_id, 'council_meeting_location', sanitize_text_field( wp_unslash( $_POST['council_meeting_location'] ) ) );
+		$location = sanitize_text_field( wp_unslash( $_POST['council_meeting_location'] ) );
+
+		update_post_meta( $post_id, 'council_meeting_location', $location );
 	} elseif ( isset( $_POST['council_meeting_location'] ) ) {
 		delete_post_meta( $post_id, 'council_meeting_location' );
 	}
@@ -789,6 +800,8 @@ function show_past_council_meetings() {
 			<?php
 		}
 		$html = ob_get_clean();
+	} else {
+		$html = '';
 	}
 
 	wp_reset_postdata();
@@ -858,6 +871,8 @@ function show_future_council_meetings() {
 			<?php
 		}
 		$html = ob_get_clean();
+	} else {
+		$html = '';
 	}
 
 	wp_reset_postdata();
