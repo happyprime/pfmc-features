@@ -163,8 +163,9 @@ function display_sc_events_list_shortcode( $atts, $content = null ) {
  */
 function get_events_list( $display = 'upcoming', $taxonomies = array(), $number = 5, $show = array(), $order = '' ) {
 
-	// Get today, to query before/after.
-	$today = date( 'Y-m-d' ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+	// Get today, to query before/after. The event date is stored in local time, which
+	// wp_date() provides when no timezone is provided.
+	$today = wp_date( 'Y-m-d' );
 
 	// Mutate order to uppercase if not empty.
 	if ( ! empty( $order ) ) {
