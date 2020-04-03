@@ -10,6 +10,7 @@ namespace PFMCFS\WP_Document_Revisions;
 add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_post_type_args', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\register_categories_for_documents', 11 );
 add_action( 'init', __NAMESPACE__ . '\register_taxonomies', 10 );
+add_action( 'init', __NAMESPACE__ . '\add_sticky_support', 10 );
 
 /**
  * Expose the `document` post type in the REST API.
@@ -94,4 +95,11 @@ function register_taxonomies() {
 	);
 
 	register_taxonomy( 'document_group', array( 'document' ), $args );
+}
+
+/**
+ * Adds sticky support to the `document` post type.
+ */
+function add_sticky_support() {
+	add_post_type_support( 'document', 'sticky' );
 }
