@@ -11,7 +11,6 @@ add_action( 'init', __NAMESPACE__ . '\add_sticky_status_view', 11 );
 add_filter( 'query_vars', __NAMESPACE__ . '\filter_query_vars' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\block_editor_sticky_checkbox' );
 add_action( 'post_submitbox_misc_actions', __NAMESPACE__ . '\classic_editor_sticky_checkbox' );
-add_action( 'save_post', __NAMESPACE__ . '\save_sticky_status', 10, 2 );
 
 /**
  * Hooks into `views_edit-{$post_type}` for post types with sticky support.
@@ -31,6 +30,7 @@ function add_sticky_status_view() {
 
 		add_filter( "views_edit-{$post_type}", __NAMESPACE__ . '\sticky_status_view' );
 		add_action( "rest_insert_{$post_type}", __NAMESPACE__ . '\rest_save_sticky_status', 10, 2 );
+		add_action( "save_post_{$post_type}", __NAMESPACE__ . '\save_sticky_status', 10 );
 	}
 }
 
@@ -181,19 +181,20 @@ function classic_editor_sticky_checkbox( $post ) {
 /**
  * Updates a post's sticky status.
  *
- * @param int    $post_id Post ID.
- * @param WP_Post $post   Post object.
+ * @param int $post_id Post ID.
  */
-function save_sticky_status( $post_id, $post ) {
-	// Return early if the nonce is not set or cannot be verified.
+function save_sticky_status( $post_id ) {
+	// Return early if the nonce is not set or cannot be verified,
+	// or the user doesn't have adequate permissions.
 	if (
 		! isset( $_POST['pfmc_post_sticky_nonce'] )
 		|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pfmc_post_sticky_nonce'] ) ), 'pfmc_save_post_sticky_status' )
+		|| ! current_user_can( 'edit_others_posts' )
 	) {
 		return;
 	}
 
-	if ( isset( $_POST['_pfmc_sticky_status'] ) ) {
+	if ( $_POST['_pfmc_sticky_status'] ) {
 		stick_post( $post_id );
 	} else {
 		unstick_post( $post_id );
