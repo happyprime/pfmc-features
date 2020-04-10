@@ -151,7 +151,7 @@ function block_editor_sticky_checkbox() {
  * @param WP_Post    $post    Inserted or updated post object.
  * @param WP_Request $request Request object.
  */
-function rest_save_editor_template( $post, $request ) {
+function rest_save_sticky_status( $post, $request ) {
 	if (
 		post_type_supports( $post->post_type, 'sticky' )
 		&& current_user_can( 'edit_others_posts' )
