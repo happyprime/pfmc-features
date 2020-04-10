@@ -236,7 +236,7 @@ function display_alert_bar() {
 				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => '_pfmcfs_alert_display_through',
-						'value'   => gmdate( 'Y-m-d' ),
+						'value'   => wp_date( 'Y-m-d' ),
 						'compare' => '>=',
 						'type'    => 'DATE',
 					),
