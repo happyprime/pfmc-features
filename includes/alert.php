@@ -237,7 +237,7 @@ function display_alert_bar() {
 					array(
 						'key'     => '_pfmcfs_alert_display_through',
 						'value'   => gmdate( 'Y-m-d' ),
-						'compare' => '>',
+						'compare' => '>=',
 						'type'    => 'DATE',
 					),
 				),

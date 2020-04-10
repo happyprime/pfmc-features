@@ -37,7 +37,7 @@ if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
  * @return string Current alert transient key.
  */
 function get_pfmc_alert_transient_key() {
-	return 'pfmc_alert_data_001';
+	return 'pfmc_alert_data_002';
 }
 
 require_once __DIR__ . '/includes/managed-fisheries.php';
