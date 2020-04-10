@@ -10,7 +10,6 @@ namespace PFMCFS\CPT_Sticky_Support;
 add_action( 'init', __NAMESPACE__ . '\add_sticky_status_view', 11 );
 add_filter( 'query_vars', __NAMESPACE__ . '\filter_query_vars' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\block_editor_sticky_checkbox' );
-add_action( 'rest_insert_post', __NAMESPACE__ . '\rest_save_sticky_status', 10, 2 );
 add_action( 'post_submitbox_misc_actions', __NAMESPACE__ . '\classic_editor_sticky_checkbox' );
 add_action( 'save_post', __NAMESPACE__ . '\save_sticky_status', 10, 2 );
 
@@ -31,6 +30,7 @@ function add_sticky_status_view() {
 		}
 
 		add_filter( "views_edit-{$post_type}", __NAMESPACE__ . '\sticky_status_view' );
+		add_action( "rest_insert_{$post_type}", __NAMESPACE__ . '\rest_save_sticky_status', 10, 2 );
 	}
 }
 
@@ -152,11 +152,7 @@ function block_editor_sticky_checkbox() {
  * @param WP_Request $request Request object.
  */
 function rest_save_sticky_status( $post, $request ) {
-	if (
-		post_type_supports( $post->post_type, 'sticky' )
-		&& current_user_can( 'edit_others_posts' )
-		&& $request->get_param( 'StickyStatus' )
-	) {
+	if ( current_user_can( 'edit_others_posts' ) ) {
 		if ( $request->get_param( 'StickyStatus' ) ) {
 			stick_post( $post->ID );
 		} else {
