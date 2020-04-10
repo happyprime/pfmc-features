@@ -104,7 +104,7 @@ function display_alert_meta_box( $post ) {
 	$through_default = gmdate( 'Y-m-d' );
 
 	// Set the default "Display alert through" value as one day from now.
-	$through = ( $through ) ? $through : gmdate( 'Y-m-d', strtotime( '+1 day' ) );
+	$through = ( $through ) ? $through : wp_date( 'Y-m-d', strtotime( '+1 day' ) );
 
 	?>
 	<p><?php esc_html_e( 'Alert level', 'pfmc-feature-set' ); ?></p>
