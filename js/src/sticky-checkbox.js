@@ -20,12 +20,12 @@ function watchStatus() {
 	if ( newStatus !== undefined && newStatus !== currentStatus ) {
 		currentStatus = newStatus;
 	}
-};
+}
 
 // Dispatch sticky status when modified.
 function onUpdateStickyStatus( value ) {
 	dispatch( 'core/editor' ).editPost( { StickyStatus: value } );
-};
+}
 
 function stickyCheckbox() {
 	return (
@@ -35,7 +35,7 @@ function stickyCheckbox() {
 			onChange={ ( value ) => onUpdateStickyStatus( value ) }
 		/>
 	);
-};
+}
 
 // Register stickyCheckbox as a useable component.
 const StickyCheckboxControl = withSelect( () => {
