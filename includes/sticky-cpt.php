@@ -173,12 +173,15 @@ function rest_save_sticky_status( $post, $request ) {
  */
 function classic_editor_sticky_checkbox( $post ) {
 	if ( post_type_supports( $post->post_type, 'sticky' ) && current_user_can( 'edit_others_posts' ) ) {
-		wp_nonce_field( 'pfmc_save_post_sticky_status', 'pfmc_post_sticky_nonce' );
+		$checked = 'add' !== get_current_screen()->action && is_sticky( $post->ID );
 		?>
-		<span id="sticky-span">
-			<input id="sticky" name="_pfmc_sticky_status" type="checkbox" <?php checked( is_sticky( $post->ID ) ); ?> />
-			<label for="sticky" class="selectit"><?php esc_html_e( 'Stick to the top of the blog', '' ); ?></label><br />
-		</span>
+		<div class="misc-pub-section pfmc-sticky">
+			<?php wp_nonce_field( 'pfmc_save_post_sticky_status', 'pfmc_post_sticky_nonce' ); ?>
+			<span id="sticky-span">
+				<input id="sticky" name="_pfmc_sticky_status" type="checkbox" <?php checked( $checked ); ?> />
+				<label for="sticky" class="selectit"><?php esc_html_e( 'Stick to the top of the blog', '' ); ?></label><br />
+			</span>
+		</div>
 		<?php
 	}
 }
@@ -267,11 +270,7 @@ function bulk_edit_sticky_select( $column_name ) {
  * @param string $hook_suffix The current admin page.
  */
 function enqueue_inline_edit_scripts( $hook_suffix ) {
-	if ( 'edit.php' !== $hook_suffix ) {
-		return;
-	}
-
-	if ( current_user_can( 'edit_others_posts' ) ) {
+	if ( 'edit.php' === $hook_suffix && current_user_can( 'edit_others_posts' ) ) {
 		wp_enqueue_script(
 			'pfmc-cpt-sticky-inline-edit',
 			plugins_url( 'js/sticky-inline-edit.js', dirname( __FILE__ ) ),
@@ -281,12 +280,14 @@ function enqueue_inline_edit_scripts( $hook_suffix ) {
 		);
 	}
 
-	wp_enqueue_style(
-		'pfmc-cpt-sticky-inline-edit',
-		plugins_url( 'css/sticky-inline-edit.css', dirname( __FILE__ ) ),
-		array(),
-		'0.0.1'
-	);
+	if ( in_array( $hook_suffix, array( 'edit.php', 'post-new.php', 'post.php' ), true ) ) {
+		wp_enqueue_style(
+			'pfmc-cpt-sticky-inline-edit',
+			plugins_url( 'css/sticky-inline-edit.css', dirname( __FILE__ ) ),
+			array(),
+			'0.0.1'
+		);
+	}
 }
 
 /**
