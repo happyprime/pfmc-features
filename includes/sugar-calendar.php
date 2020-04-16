@@ -17,7 +17,6 @@ add_action( 'add_meta_boxes_sc_event', __NAMESPACE__ . '\add_meta_boxes' );
 add_action( 'save_post_sc_event', __NAMESPACE__ . '\generate_post', 10, 2 );
 add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event_generated_post', 10 );
 add_action( 'template_redirect', __NAMESPACE__ . '\redirect_event_generated_posts', 10 );
-add_action( 'init', __NAMESPACE__ . '\add_sticky_support' );
 
 /**
  * Expose the `sc_event` post type in the REST API.
@@ -612,11 +611,4 @@ function redirect_event_generated_posts() {
 	wp_safe_redirect( esc_url( $permalink ), 301 );
 
 	exit;
-}
-
-/**
- * Adds sticky support to the `sc_event` post type.
- */
-function add_sticky_support() {
-	add_post_type_support( 'sc_event', 'sticky' );
 }
