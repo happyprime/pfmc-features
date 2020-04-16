@@ -34,7 +34,6 @@ function init() {
 
 		add_filter( "views_edit-{$post_type}", __NAMESPACE__ . '\sticky_status_view' );
 		add_action( "rest_insert_{$post_type}", __NAMESPACE__ . '\rest_save_sticky_status', 10, 2 );
-		add_action( "save_post_{$post_type}", __NAMESPACE__ . '\save_sticky_status' );
 		add_filter( "manage_{$post_type}_posts_columns", __NAMESPACE__ . '\add_sticky_column' );
 	}
 }
@@ -178,34 +177,11 @@ function classic_editor_sticky_checkbox( $post ) {
 		<div class="misc-pub-section pfmc-sticky">
 			<?php wp_nonce_field( 'pfmc_save_post_sticky_status', 'pfmc_post_sticky_nonce' ); ?>
 			<span id="sticky-span">
-				<input id="sticky" name="_pfmc_sticky_status" type="checkbox" <?php checked( $checked ); ?> />
+				<input id="sticky" name="sticky" type="checkbox" <?php checked( $checked ); ?> />
 				<label for="sticky" class="selectit"><?php esc_html_e( 'Stick to the top of the blog', '' ); ?></label><br />
 			</span>
 		</div>
 		<?php
-	}
-}
-
-/**
- * Updates a post's sticky status.
- *
- * @param int $post_id Post ID.
- */
-function save_sticky_status( $post_id ) {
-	// Return early if the nonce is not set or cannot be verified,
-	// or the user doesn't have adequate permissions.
-	if (
-		! isset( $_POST['pfmc_post_sticky_nonce'] )
-		|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pfmc_post_sticky_nonce'] ) ), 'pfmc_save_post_sticky_status' )
-		|| ! current_user_can( 'edit_others_posts' )
-	) {
-		return;
-	}
-
-	if ( $_POST['_pfmc_sticky_status'] ) {
-		stick_post( $post_id );
-	} else {
-		unstick_post( $post_id );
 	}
 }
 
@@ -234,7 +210,7 @@ function quick_edit_sticky_checkbox( $column_name ) {
 	?>
 	<label class="pfmc-inline-edit-sticky alignleft">
 		<?php wp_nonce_field( 'pfmc_save_post_sticky_status', 'pfmc_post_sticky_nonce' ); ?>
-		<input id="pfmc-sticky-quick" name="_pfmc_sticky_status" type="checkbox" />
+		<input id="pfmc-sticky-quick" name="sticky" type="checkbox" />
 		<span class="checkbox-title"><?php esc_html_e( 'Make this post sticky', '' ); ?></span>
 	</label>
 	<?php
@@ -254,7 +230,7 @@ function bulk_edit_sticky_select( $column_name ) {
 	<label class="pfmc-inline-edit-sticky alignright">
 		<?php wp_nonce_field( 'pfmc_save_post_sticky_status', 'pfmc-sticky-bulk-nonce' ); ?>
 		<span class="title">Sticky</span>
-		<select id="pfmc-sticky-bulk" name="_pfmc_sticky_status">
+		<select id="pfmc-sticky-bulk" name="sticky">
 			<option value=""><?php esc_html_e( '&mdash; No Change &mdash;' ); ?></option>
 			<option value="yes"><?php esc_html_e( 'Sticky' ); ?></option>
 			<option value="no"><?php esc_html_e( 'Not Sticky' ); ?></option>
