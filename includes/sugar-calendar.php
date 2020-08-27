@@ -10,6 +10,7 @@ namespace PFMCFS\SugarCalendar;
 add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_post_type_args', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\register_categories_for_events', 11 );
 add_action( 'after_setup_theme', __NAMESPACE__ . '\remove_default_shortcode_registration' );
+add_filter( 'sc_calendar_dropdown_categories_args', __NAMESPACE__ . '\filter_calendar_dropdown_categories_args', 10 );
 add_action( 'init', __NAMESPACE__ . '\add_shortcodes' );
 add_filter( 'sc_events_query_clauses', __NAMESPACE__ . '\sugar_calendar_join_by_taxonomy_term', 15, 2 );
 add_action( 'sc_parse_events_query', __NAMESPACE__ . '\sugar_calendar_pre_get_events_by_taxonomy', 15 );
@@ -44,6 +45,22 @@ function register_categories_for_events() {
  */
 function remove_default_shortcode_registration() {
 	remove_action( 'init', 'sc_add_shortcodes' );
+}
+
+/**
+ * Adjust the arguments passed to wp_dropdown_categories() in the Sugar Calendar
+ * calendar selection form.
+ *
+ * This form is hidden from view on the front end and there are no calendars to
+ * choose from.
+ */
+function filter_calendar_dropdown_categories_args( $args ) {
+	$args['selected'] = 0;
+
+	// This is `-1` by default, which causes a 404 when embedded on an archive page.
+	$args['option_none_value'] = '';
+
+	return $args;
 }
 
 /**
