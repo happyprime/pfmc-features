@@ -549,7 +549,7 @@ function generate_post( $post_id, $post ) {
 		array_merge(
 			$post_data,
 			array(
-				'meta_input'    => array(
+				'meta_input' => array(
 					'_sc_event_permalink' => $permalink,
 				),
 			)
