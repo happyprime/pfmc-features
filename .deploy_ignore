@@ -1,0 +1,6 @@
+.deploy_ignore
+.gitignore
+README.md
+/.git/
+/.github/
+/node_modules/
