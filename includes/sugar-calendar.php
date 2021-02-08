@@ -18,6 +18,7 @@ add_action( 'add_meta_boxes_sc_event', __NAMESPACE__ . '\add_meta_boxes' );
 add_action( 'save_post_sc_event', __NAMESPACE__ . '\generate_post', 10, 2 );
 add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event_generated_post', 10 );
 add_action( 'template_redirect', __NAMESPACE__ . '\redirect_event_generated_posts', 10 );
+add_action( 'pre_get_posts', __NAMESPACE__ . '\filter_managed_fisheries_connect_query', 1000 );
 
 /**
  * Expose the `sc_event` post type in the REST API.
@@ -628,4 +629,24 @@ function redirect_event_generated_posts() {
 	wp_safe_redirect( esc_url( $permalink ), 301 );
 
 	exit;
+}
+
+/**
+ * Unhook Sugar Calendar filters for Managed Fishery Connect taxonomy queries,
+ * and set the post type parameter to `post`.
+ *
+ * @param WP_Query $query The WP_Query instance.
+ */
+function filter_managed_fisheries_connect_query( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	if ( is_tax( 'managed_fishery_connect' ) ) {
+		$query->set( 'post_type', 'post' );
+
+		remove_filter( 'posts_where', 'sc_modify_events_archive_where', 10, 2 );
+		remove_filter( 'posts_join', 'sc_modify_events_archive_join', 10, 2 );
+		remove_filter( 'posts_orderby', 'sc_modify_events_archive_orderby', 10, 2 );
+	}
 }
