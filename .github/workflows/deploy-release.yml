@@ -1,9 +1,8 @@
-name: CI
+name: Release Deployment
 
 on:
   push:
-    branches:
-      - release
+    branches: [ release ]
 
 jobs:
   build:
@@ -11,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+
     - name: Deploy to Fisheries server
+      if: success()
       uses: HappyPrime/FTP-Deploy-Action@master
       env:
         FTP_METHOD: ftp
@@ -22,6 +23,7 @@ jobs:
         FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         LOCAL_DIR: ${{ secrets.LOCAL_DIR }}
         REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
+
     - name: Successful deployment Slack notification
       if: success()
       uses: wearerequired/slack-messaging-action@v1
@@ -38,8 +40,8 @@ jobs:
                     "author_link": "${{ github.event.sender.html_url }}",
                     "author_icon": "${{ github.event.sender.avatar_url }}",
                     "color": "good",
-                    "fallback": "Deployment from the release branch to https://pcouncil.missingcolors.com complete.",
-                    "pretext": "Deployment from the `release` branch to https://pcouncil.missingcolors.com complete.",
+                    "fallback": "Deployment from the release branch to https://pcouncil.org complete.",
+                    "pretext": "Deployment from the `release` branch to https://pcouncil.org complete.",
                     "fields": [
                         {
                           "title": "Deployed revision",
@@ -68,8 +70,8 @@ jobs:
                     "author_link": "${{ github.event.sender.html_url }}",
                     "author_icon": "${{ github.event.sender.avatar_url }}",
                     "color": "#ff0000",
-                    "fallback": "Deployment from the release branch to https://pcouncil.missingcolors.com has failed.",
-                    "pretext": "Deployment from the `release` branch to https://pcouncil.missingcolors.com has failed.",
+                    "fallback": "Deployment from the release branch to https://pcouncil.org has failed.",
+                    "pretext": "Deployment from the `release` branch to https://pcouncil.org has failed.",
                     "fields": [
                         {
                           "title": "Deployed revision",
