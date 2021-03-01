@@ -7,9 +7,9 @@
     "@wordpress/scripts": "^13.0.3"
   },
   "scripts": {
-    "start": "wp-scripts start js/src/*.js --output-path=js/",
-    "build": "wp-scripts build js/src/*.js --output-path=js/",
-    "lint:js": "wp-scripts lint-js ./js/src",
-    "fix:js": "wp-scripts lint-js ./js/src --fix"
+    "start": "wp-scripts start js/*.js --output-path=js/build/",
+    "build": "wp-scripts build js/*.js --output-path=js/build/",
+    "lint:js": "wp-scripts lint-js ./js/*.js",
+    "fix:js": "wp-scripts lint-js ./js/*.js --fix"
   }
 }

@@ -128,7 +128,7 @@ function block_editor_sticky_checkbox() {
 	) {
 		wp_enqueue_script(
 			'pfmc-cpt-sticky-checkbox',
-			plugins_url( 'js/sticky-checkbox.js', dirname( __FILE__ ) ),
+			plugins_url( 'js/build/sticky-checkbox.js', dirname( __FILE__ ) ),
 			array(
 				'wp-i18n',
 				'wp-plugins',
@@ -249,7 +249,7 @@ function enqueue_inline_edit_scripts( $hook_suffix ) {
 	if ( 'edit.php' === $hook_suffix && current_user_can( 'edit_others_posts' ) ) {
 		wp_enqueue_script(
 			'pfmc-cpt-sticky-inline-edit',
-			plugins_url( 'js/sticky-inline-edit.js', dirname( __FILE__ ) ),
+			plugins_url( 'js/build/sticky-inline-edit.js', dirname( __FILE__ ) ),
 			array(),
 			'0.0.1',
 			true

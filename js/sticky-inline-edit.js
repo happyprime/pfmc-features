@@ -1,1 +1,95 @@
-!function(e){var t={};function n(o){if(t[o])return t[o].exports;var r=t[o]={i:o,l:!1,exports:{}};return e[o].call(r.exports,r,r.exports,n),r.l=!0,r.exports}n.m=e,n.c=t,n.d=function(e,t,o){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:o})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var o=Object.create(null);if(n.r(o),Object.defineProperty(o,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var r in e)n.d(o,r,function(t){return e[t]}.bind(null,r));return o},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=3)}([,function(e,t){function n(t){return"function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?e.exports=n=function(e){return typeof e}:e.exports=n=function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},n(t)}e.exports=n},,function(e,t,n){"use strict";n.r(t);var o,r,i=n(1),c=n.n(i);o=document.querySelectorAll(".pfmc-inline-edit-sticky"),r=window.inlineEditPost.edit,o.forEach((function(e){var t=e.previousElementSibling.querySelectorAll(".inline-edit-group");t[t.length-1].appendChild(e)})),document.getElementById("sticky-hide").parentElement.remove(),window.inlineEditPost.edit=function(e){if(r.apply(this,arguments),"object"===c()(e)&&(e=parseInt(this.getId(e))),e>0){var t=document.getElementById("edit-".concat(e)),n=document.getElementById("post-".concat(e));n.querySelector(".column-title .post-state")&&(t.querySelector("#pfmc-sticky-quick").checked=!0)}},document.addEventListener("click",(function(e){if("bulk_edit"===e.target.id){var t=document.getElementById("pfmc-sticky-bulk").value;if(""!==t){var n=document.getElementById("pfmc-sticky-bulk-nonce").value,o=document.getElementById("bulk-titles").children,r=new FormData,i=new Array;Array.from(o).forEach((function(e){i.push(e.id.replace("ttle",""))})),r.append("action","save_bulk_edit_sticky_status"),r.append("post_ids",i),r.append("sticky",t),r.append("nonce",n),fetch(window.ajaxurl,{method:"POST",credentials:"same-origin",headers:new Headers({"Content-Type":"application/x-www-form-urlencoded"}),body:new URLSearchParams(r)})}}}))}]);
+( function () {
+	// Get the fields for handling sticky status.
+	const stickyFields = document.querySelectorAll(
+		'.pfmc-inline-edit-sticky'
+	);
+
+	// Create a copy of the core WP inline edit post function.
+	const pfmcInlineEdit = window.inlineEditPost.edit;
+
+	// Move all sticky checkboxes and dropdowns to a more "core WP" location.
+	stickyFields.forEach( ( field ) => {
+		const column = field.previousElementSibling;
+		const group = column.querySelectorAll( '.inline-edit-group' );
+		const lastGroup = group[ group.length - 1 ];
+
+		lastGroup.appendChild( field );
+	} );
+
+	// Hide the "Sticky" checkbox from the screen options Columns group.
+	// The "Sticky" column itself is hidden with CSS.
+	document.getElementById( 'sticky-hide' ).parentElement.remove();
+
+	/**
+	 * Sets the `checked` attribute for quick edit checkboxes, if appropriate.
+	 *
+	 * @param {number|Object} id The id of the clicked post or an element within a post
+	 *                           table row.
+	 */
+	window.inlineEditPost.edit = function ( id ) {
+		// Merge arguments of the core WP inline edit post function.
+		pfmcInlineEdit.apply( this, arguments );
+
+		if ( typeof id === 'object' ) {
+			id = parseInt( this.getId( id ) );
+		}
+
+		if ( id > 0 ) {
+			const editRow = document.getElementById( `edit-${ id }` );
+			const postRow = document.getElementById( `post-${ id }` );
+
+			// The post is sticky if it's title column containst the sticky flag.
+			if ( postRow.querySelector( '.column-title .post-state' ) ) {
+				editRow.querySelector( '#pfmc-sticky-quick' ).checked = true;
+			}
+		}
+	};
+
+	/**
+	 * Handles sticky status changes from the bulk edit interface.
+	 */
+	document.addEventListener( 'click', ( event ) => {
+		// Return early if the click wasn't on the bulk edit "Submit" button.
+		if ( 'bulk_edit' !== event.target.id ) {
+			return;
+		}
+
+		// Get the value of the "Sticky" dropdown.
+		const sticky = document.getElementById( 'pfmc-sticky-bulk' ).value;
+
+		// Return early if the "No Change" option of the "Sticky" dropdown is selected.
+		if ( '' === sticky ) {
+			return;
+		}
+
+		const nonce = document.getElementById( 'pfmc-sticky-bulk-nonce' ).value;
+		const posts = document.getElementById( 'bulk-titles' ).children;
+
+		// Initialize a new FormData object for capturing request data.
+		const params = new FormData();
+
+		// Initialize an array for capturing IDs of the selected posts.
+		const postIds = new Array();
+
+		// Get ids of the posts being edited.
+		Array.from( posts ).forEach( ( title ) => {
+			postIds.push( title.id.replace( 'ttle', '' ) );
+		} );
+
+		// Add data to send with the body of the request.
+		params.append( 'action', 'save_bulk_edit_sticky_status' );
+		params.append( 'post_ids', postIds );
+		params.append( 'sticky', sticky );
+		params.append( 'nonce', nonce );
+
+		// Send an AJAX request to save the sticky status change.
+		fetch( window.ajaxurl, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: new Headers( {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			} ),
+			body: new URLSearchParams( params ),
+		} );
+	} );
+} )();

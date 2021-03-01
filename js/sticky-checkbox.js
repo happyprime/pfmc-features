@@ -1,1 +1,63 @@
-!function(t){var e={};function n(r){if(e[r])return e[r].exports;var o=e[r]={i:r,l:!1,exports:{}};return t[r].call(o.exports,o,o.exports,n),o.l=!0,o.exports}n.m=t,n.c=e,n.d=function(t,e,r){n.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:r})},n.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},n.t=function(t,e){if(1&e&&(t=n(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var o in t)n.d(r,o,function(e){return t[e]}.bind(null,o));return r},n.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return n.d(e,"a",e),e},n.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},n.p="",n(n.s=2)}([function(t,e){!function(){t.exports=this.wp.element}()},,function(t,e,n){"use strict";n.r(e);var r=n(0),o=wp.plugins.registerPlugin,i=wp.i18n.__,u=wp.editPost.PluginPostStatusInfo,c=wp.components.CheckboxControl,l=wp.data,a=l.dispatch,f=l.select,s=l.subscribe,d=l.withSelect,p=window.StickyStatus.isSticky;var b=d((function(){return{stickyStatusKey:f("core/editor").getEditedPostAttribute("StickyStatus")}}))((function(){return Object(r.createElement)(c,{label:i("Stick to the top of the blog"),checked:p,onChange:function(t){return function(t){a("core/editor").editPost({StickyStatus:t})}(t)}})}));s((function(){var t;void 0!==(t=f("core/editor").getEditedPostAttribute("StickyStatus"))&&t!==p&&(p=t)})),o("cpt-sticky-checkbox",{render:function(){return Object(r.createElement)(u,null,Object(r.createElement)(b,null))}})}]);
+const { registerPlugin } = wp.plugins;
+
+const { __ } = wp.i18n;
+
+const { PluginPostStatusInfo } = wp.editPost;
+
+const { CheckboxControl } = wp.components;
+
+const { dispatch, select, subscribe, withSelect } = wp.data;
+
+// Gets current sticky status from localized data.
+let currentStatus = window.StickyStatus.isSticky;
+
+// Updates currentStatus if the StickyStatus attribute has been modified.
+function watchStatus() {
+	const newStatus = select( 'core/editor' ).getEditedPostAttribute(
+		'StickyStatus'
+	);
+
+	if ( newStatus !== undefined && newStatus !== currentStatus ) {
+		currentStatus = newStatus;
+	}
+}
+
+// Dispatch sticky status when modified.
+function onUpdateStickyStatus( value ) {
+	dispatch( 'core/editor' ).editPost( { StickyStatus: value } );
+}
+
+function stickyCheckbox() {
+	return (
+		<CheckboxControl
+			label={ __( 'Stick to the top of the blog' ) }
+			checked={ currentStatus }
+			onChange={ ( value ) => onUpdateStickyStatus( value ) }
+		/>
+	);
+}
+
+// Register stickyCheckbox as a useable component.
+const StickyCheckboxControl = withSelect( () => {
+	const stickyStatusKey = select( 'core/editor' ).getEditedPostAttribute(
+		'StickyStatus'
+	);
+
+	return {
+		stickyStatusKey,
+	};
+} )( stickyCheckbox );
+
+// Subscribes to editor changes.
+subscribe( () => watchStatus() );
+
+// Register as a plugin and render inside the PluginPostStatusInfo component.
+registerPlugin( 'cpt-sticky-checkbox', {
+	render() {
+		return (
+			<PluginPostStatusInfo>
+				<StickyCheckboxControl />
+			</PluginPostStatusInfo>
+		);
+	},
+} );
