@@ -14,6 +14,7 @@ add_filter( 'upload_mimes', __NAMESPACE__ . '\filter_upload_mimes' );
  */
 function filter_mime_types( $mimes ) {
 	$mimes['xlsm'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+	$mimes['ppsx'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 	return $mimes;
 }
 
@@ -26,5 +27,7 @@ function filter_mime_types( $mimes ) {
  */
 function filter_upload_mimes( $existing_mimes ) {
 	$existing_mimes['xlsm'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+	$existing_mimes['ppsx'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
 	return $existing_mimes;
 }
