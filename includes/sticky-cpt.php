@@ -33,7 +33,7 @@ function init() {
 		}
 
 		add_filter( "views_edit-{$post_type}", __NAMESPACE__ . '\sticky_status_view' );
-		add_action( "rest_insert_{$post_type}", __NAMESPACE__ . '\rest_save_sticky_status', 10, 2 );
+		add_action( "rest_insert_{$post_type}", __NAMESPACE__ . '\rest_save_sticky_status', 11, 2 );
 		add_filter( "manage_{$post_type}_posts_columns", __NAMESPACE__ . '\add_sticky_column' );
 	}
 }
