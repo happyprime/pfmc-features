@@ -126,16 +126,14 @@ function block_editor_sticky_checkbox() {
 		&& current_user_can( 'edit_others_posts' )
 		&& is_admin()
 	) {
+
+		$asset_data = require_once dirname( __DIR__ ) . '/js/build/sticky-checkbox.asset.php';
+
 		wp_enqueue_script(
 			'pfmc-cpt-sticky-checkbox',
 			plugins_url( 'js/build/sticky-checkbox.js', dirname( __FILE__ ) ),
-			array(
-				'wp-i18n',
-				'wp-plugins',
-				'wp-edit-post',
-				'wp-components',
-			),
-			'0.0.1',
+			$asset_data['dependencies'],
+			$asset_data['version'],
 			true
 		);
 
@@ -247,11 +245,13 @@ function bulk_edit_sticky_select( $column_name ) {
  */
 function enqueue_inline_edit_scripts( $hook_suffix ) {
 	if ( 'edit.php' === $hook_suffix && current_user_can( 'edit_others_posts' ) ) {
+		$asset_data = require_once dirname( __DIR__ ) . '/js/build/sticky-checkbox.asset.php';
+
 		wp_enqueue_script(
 			'pfmc-cpt-sticky-inline-edit',
 			plugins_url( 'js/build/sticky-inline-edit.js', dirname( __FILE__ ) ),
-			array(),
-			'0.0.1',
+			$asset_data['dependencies'],
+			$asset_data['version'],
 			true
 		);
 	}
