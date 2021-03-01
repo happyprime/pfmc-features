@@ -208,7 +208,7 @@ function get_events_list( $display = 'upcoming', $taxonomies = array(), $number 
 			'orderby'     => 'start',
 			'order'       => $order,
 			'number'      => $number,
-			'start_query' => array(
+			'end_query'   => array(
 				'inclusive' => true,
 				'after'     => $today,
 			),
