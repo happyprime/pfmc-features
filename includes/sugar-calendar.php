@@ -19,6 +19,8 @@ add_action( 'save_post_sc_event', __NAMESPACE__ . '\generate_post', 10, 2 );
 add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event_generated_post', 10 );
 add_action( 'template_redirect', __NAMESPACE__ . '\redirect_event_generated_posts', 10 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\filter_managed_fisheries_connect_query', 1000 );
+add_filter( 'the_content', __NAMESPACE__ . '\remove_content_hooks', 9 );
+add_filter( 'the_excerpt', __NAMESPACE__ . '\remove_content_hooks', 9 );
 
 /**
  * Expose the `sc_event` post type in the REST API.
@@ -649,4 +651,18 @@ function filter_managed_fisheries_connect_query( $query ) {
 		remove_filter( 'posts_join', 'sc_modify_events_archive_join', 10, 2 );
 		remove_filter( 'posts_orderby', 'sc_modify_events_archive_orderby', 10, 2 );
 	}
+}
+
+/**
+ * Remove the content and excerpt filter hooks from non-event views.
+ *
+ * @param string $content Content or excerpt of the current post.
+ * @return string
+ */
+function remove_content_hooks( $content ) {
+	if ( ! is_singular( 'sc_event' ) && ! is_post_type_archive( 'sc_event' ) ) {
+		remove_filter( current_filter(), 'sc_event_content_hooks' );
+	}
+
+	return $content;
 }
