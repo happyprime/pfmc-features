@@ -49,3 +49,4 @@ require_once __DIR__ . '/includes/document-revisions.php';
 require_once __DIR__ . '/includes/media.php';
 require_once __DIR__ . '/includes/alert.php';
 require_once __DIR__ . '/includes/analytics.php';
+require_once __DIR__ . '/includes/sticky-cpt.php';

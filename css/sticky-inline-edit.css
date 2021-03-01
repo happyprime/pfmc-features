@@ -1,0 +1,8 @@
+.column-sticky {
+	display: none;
+	visibility: collapse;
+}
+
+.pfmc-sticky #sticky-span {
+	margin: 0;
+}
