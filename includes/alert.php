@@ -104,7 +104,7 @@ function display_alert_meta_box( $post ) {
 	$through_default = gmdate( 'Y-m-d' );
 
 	// Set the default "Display alert through" value as one day from now.
-	$through = ( $through ) ? $through : gmdate( 'Y-m-d', strtotime( '+1 day' ) );
+	$through = ( $through ) ? $through : wp_date( 'Y-m-d', strtotime( '+1 day' ) );
 
 	?>
 	<p><?php esc_html_e( 'Alert level', 'pfmc-feature-set' ); ?></p>
@@ -236,8 +236,8 @@ function display_alert_bar() {
 				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => '_pfmcfs_alert_display_through',
-						'value'   => gmdate( 'Y-m-d' ),
-						'compare' => '>',
+						'value'   => wp_date( 'Y-m-d' ),
+						'compare' => '>=',
 						'type'    => 'DATE',
 					),
 				),
