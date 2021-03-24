@@ -5,7 +5,7 @@
  * Description: Custom features for the Pacific Fishery Management Council website.
  * Author:      Happy Prime
  * Author URI:  https://happyprime.co
- * Version:     0.1.0
+ * Version:     0.2.0
  *
  * @package     PFMC_Feature_Set
  */
@@ -37,7 +37,7 @@ if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
  * @return string Current alert transient key.
  */
 function get_pfmc_alert_transient_key() {
-	return 'pfmc_alert_data_001';
+	return 'pfmc_alert_data_002';
 }
 
 require_once __DIR__ . '/includes/managed-fisheries.php';
@@ -49,3 +49,4 @@ require_once __DIR__ . '/includes/document-revisions.php';
 require_once __DIR__ . '/includes/media.php';
 require_once __DIR__ . '/includes/alert.php';
 require_once __DIR__ . '/includes/analytics.php';
+require_once __DIR__ . '/includes/sticky-cpt.php';

@@ -10,6 +10,7 @@ namespace PFMCFS\Shadow_Taxonomies;
 add_action( 'init', __NAMESPACE__ . '\register_taxonomies', 10 );
 add_action( 'save_post_managed_fishery', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
 add_action( 'save_post_council_meeting', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
+add_filter( 'get_the_archive_title', __NAMESPACE__ . '\filter_managed_fishery_connect_archive_title', 10, 2 );
 
 /**
  * Register the Managed Fisheries and Council Meetings shadow taxonomies.
@@ -117,4 +118,19 @@ function update_shadow_taxonomy( $post_id, $post ) {
 
 	// Create a new term using the title of this post as a name.
 	wp_insert_term( $post->post_title, $taxonomy );
+}
+
+/**
+ * Filter page title on `managed_fishery_connect` taxonomy term archive views.
+ *
+ * @param string $title          Archive title to be displayed.
+ * @param string $original_title Archive title without prefix.
+ * @return string
+ */
+function filter_managed_fishery_connect_archive_title( $title, $original_title ) {
+	if ( is_tax( 'managed_fishery_connect' ) ) {
+		$title = __( 'News & Events: ', 'pfmc-feature-set' ) . $original_title;
+	}
+
+	return $title;
 }

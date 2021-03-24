@@ -50,6 +50,7 @@ function register_post_type() {
 			'title',
 			'editor',
 			'thumbnail',
+			'sticky',
 		),
 		'taxonomies'            => array(
 			'category',
