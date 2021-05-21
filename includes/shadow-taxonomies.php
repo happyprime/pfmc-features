@@ -17,6 +17,8 @@ add_action( 'council_meeting_connect_add_form_fields', __NAMESPACE__ . '\add_new
 add_action( 'council_meeting_connect_edit_form_fields', __NAMESPACE__ . '\edit_council_meeting_connect_term_meta_field' );
 add_action( 'edit_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
 add_action( 'create_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
+add_filter( 'manage_edit-council_meeting_connect_columns', __NAMESPACE__ . '\council_meeting_connect_columns', 10 );
+add_filter( 'manage_council_meeting_connect_custom_column', __NAMESPACE__ . '\council_meeting_connect_pinned_column', 10, 3 );
 add_filter( 'rest_council_meeting_connect_query', __NAMESPACE__ . '\filter_rest_api_query', 11, 2 );
 
 /**
@@ -229,6 +231,35 @@ function save_council_meeting_connect_term_meta( $term_id ) {
 	} else {
 		delete_term_meta( $term_id, '_pinned' );
 	}
+}
+
+/**
+ * Register a "Pinned" column for the Council Meeting Connect taxonomy.
+ *
+ * @param array $columns The column header labels keyed by column ID.
+ * @return array Modified columns.
+ */
+function council_meeting_connect_columns( $columns ) {
+	$columns['pinned'] = __( 'Pinned', 'pfmc-feature-set' );
+
+	return $columns;
+}
+
+/**
+ * Display the "Pinned" status of a term in the
+ * Council Meeting Connect taxonomy terms list table.
+ *
+ * @param string $string      Blank string.
+ * @param string $column_name Name of the column.
+ * @param int    $term_id     Term ID.
+ * @return string Modified string.
+ */
+function council_meeting_connect_pinned_column( $string, $column_name, $term_id ) {
+	if ( 'pinned' === $column_name && get_term_meta( $term_id, '_pinned', true ) ) {
+		$string = '<span class="dashicons dashicons-yes"></span>';
+	}
+
+	return $string;
 }
 
 /**
