@@ -19,6 +19,8 @@ add_action( 'edit_council_meeting_connect', __NAMESPACE__ . '\save_council_meeti
 add_action( 'create_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
 add_filter( 'manage_edit-council_meeting_connect_columns', __NAMESPACE__ . '\council_meeting_connect_columns', 10 );
 add_filter( 'manage_council_meeting_connect_custom_column', __NAMESPACE__ . '\council_meeting_connect_pinned_column', 10, 3 );
+add_filter( 'manage_edit-council_meeting_connect_sortable_columns', __NAMESPACE__ . '\council_meeting_connect_sortable_columns' );
+add_action( 'pre_get_terms', __NAMESPACE__ . '\pre_get_council_meeting_connect_terms' );
 add_filter( 'rest_council_meeting_connect_query', __NAMESPACE__ . '\filter_rest_api_query', 11, 2 );
 
 /**
@@ -260,6 +262,41 @@ function council_meeting_connect_pinned_column( $string, $column_name, $term_id 
 	}
 
 	return $string;
+}
+
+/**
+ * Make the "Pinned" column sortable.
+ *
+ * @param array $sortable_columns An array of sortable columns.
+ * @return array Modified sortable columns.
+ */
+function council_meeting_connect_sortable_columns( $sortable_columns ) {
+	$sortable_columns['pinned'] = 'pinned';
+
+	return $sortable_columns;
+}
+
+/**
+ * Filter the term query to allow sorting by `_pinned` meta.
+ *
+ * @param WP_Term_Query $term_query Current instance of WP_Term_Query.
+ */
+function pre_get_council_meeting_connect_terms( $term_query ) {
+	if ( isset( $_GET['orderby'] ) && 'pinned' === $_GET['orderby'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$meta_args = array(
+			'relation'     => 'OR',
+			'order_clause' => array(
+				'key' => '__pinned',
+			),
+			array(
+				'key'     => '__pinned',
+				'compare' => 'NOT EXISTS',
+			),
+		);
+
+		$term_query->meta_query            = new \WP_Meta_Query( $meta_args );
+		$term_query->query_vars['orderby'] = 'order_clause';
+	}
 }
 
 /**
