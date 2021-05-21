@@ -11,11 +11,13 @@ add_action( 'init', __NAMESPACE__ . '\register_taxonomies', 10 );
 add_action( 'save_post_managed_fishery', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
 add_action( 'save_post_council_meeting', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
 add_filter( 'get_the_archive_title', __NAMESPACE__ . '\filter_managed_fishery_connect_archive_title', 10, 2 );
+add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_pinned_term_script' );
 add_action( 'init', __NAMESPACE__ . '\register_council_meeting_connect_term_meta' );
 add_action( 'council_meeting_connect_add_form_fields', __NAMESPACE__ . '\add_new_council_meeting_connect_term_meta_field' );
 add_action( 'council_meeting_connect_edit_form_fields', __NAMESPACE__ . '\edit_council_meeting_connect_term_meta_field' );
 add_action( 'edit_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
 add_action( 'create_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
+add_filter( 'rest_council_meeting_connect_query', __NAMESPACE__ . '\filter_rest_api_query', 11, 2 );
 
 /**
  * Register the Managed Fisheries and Council Meetings shadow taxonomies.
@@ -141,6 +143,21 @@ function filter_managed_fishery_connect_archive_title( $title, $original_title )
 }
 
 /**
+ * Enqueue script for filtering the Council Meeting Connect UI in the editor.
+ */
+function enqueue_pinned_term_script() {
+	$asset_data = require_once dirname( __DIR__ ) . '/js/build/council-meeting-connect-panel.asset.php';
+
+	wp_enqueue_script(
+		'pfmc-council-meeting-connect-panel',
+		plugins_url( 'js/build/council-meeting-connect-panel.js', dirname( __FILE__ ) ),
+		$asset_data['dependencies'],
+		$asset_data['version'],
+		true
+	);
+}
+
+/**
  * Register `_pinned` term meta for the Council Meeting Connect taxonomy.
  */
 function register_council_meeting_connect_term_meta() {
@@ -212,4 +229,18 @@ function save_council_meeting_connect_term_meta( $term_id ) {
 	} else {
 		delete_term_meta( $term_id, '_pinned' );
 	}
+}
+
+/**
+ * Allow querying terms by meta via the REST API.
+ *
+ * @param array           $prepared_args Array of arguments to be passed to get_terms().
+ * @param WP_REST_Request $request       The REST API request.
+ * @return array Modified array of arguments.
+ */
+function filter_rest_api_query( $prepared_args, $request ) {
+	$prepared_args['meta_key']   = $request['meta_key'];
+	$prepared_args['meta_value'] = $request['meta_value'];
+
+	return $prepared_args;
 }
