@@ -11,6 +11,11 @@ add_action( 'init', __NAMESPACE__ . '\register_taxonomies', 10 );
 add_action( 'save_post_managed_fishery', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
 add_action( 'save_post_council_meeting', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
 add_filter( 'get_the_archive_title', __NAMESPACE__ . '\filter_managed_fishery_connect_archive_title', 10, 2 );
+add_action( 'init', __NAMESPACE__ . '\register_council_meeting_connect_term_meta' );
+add_action( 'council_meeting_connect_add_form_fields', __NAMESPACE__ . '\add_new_council_meeting_connect_term_meta_field' );
+add_action( 'council_meeting_connect_edit_form_fields', __NAMESPACE__ . '\edit_council_meeting_connect_term_meta_field' );
+add_action( 'edit_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
+add_action( 'create_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
 
 /**
  * Register the Managed Fisheries and Council Meetings shadow taxonomies.
@@ -133,4 +138,78 @@ function filter_managed_fishery_connect_archive_title( $title, $original_title )
 	}
 
 	return $title;
+}
+
+/**
+ * Register `_pinned` term meta for the Council Meeting Connect taxonomy.
+ */
+function register_council_meeting_connect_term_meta() {
+	register_term_meta(
+		'council_meeting_connect',
+		'_pinned',
+		array(
+			'auth_callback' => function() {
+				return current_user_can( 'manage_categories' );
+			},
+			'default'       => false,
+			'show_in_rest'  => true,
+			'single'        => true,
+			'type'          => 'boolean',
+		)
+	);
+}
+
+/**
+ * Display the checkbox for capturing `_pinned` meta to
+ * the Council Meeting Connect "Add New Term" form.
+ *
+ * @param string $taxonomy The taxonomy slug.
+ */
+function add_new_council_meeting_connect_term_meta_field() {
+	wp_nonce_field( 'save_term_meta', 'term_meta_nonce' ); ?>
+	<div class="form-field term-meta-text-wrap">
+		<label>
+			<input type="checkbox" name="_pinned" />
+			<?php esc_html_e( 'Pin to top of "Council Meeting Connect" panel', 'pfmc-feature-set' ); ?>
+		</label>
+	</div>
+	<?php
+}
+
+/**
+ * Display the checkbox for capturing `_pinned` meta
+ * to the Council Meeting Connect "Edit Term" form.
+ *
+ * @param WP_Term $tag Current taxonomy term object.
+ */
+function edit_council_meeting_connect_term_meta_field( $term ) {
+	$pinned = get_term_meta( $term->term_id, '_pinned', true );
+	wp_nonce_field( 'save_term_meta', 'term_meta_nonce' );
+	?>
+	<tr class="form-field term-meta-text-wrap">
+		<th scope="row">
+			<label for="pfmc-pinned"><?php esc_html_e( 'Pin to top of "Council Meeting Connect" panel', 'pfmc-feature-set' ); ?></label>
+		</th>
+		<td>
+			<input type="checkbox" name="_pinned" id="pfmc-pinned" <?php checked( $pinned ); ?> />
+		</td>
+	</tr>
+	<?php
+}
+
+/**
+ * Save `_pinned` term meta.
+ *
+ * @param int $term_id Term ID.
+ */
+function save_council_meeting_connect_term_meta( $term_id ) {
+	if ( ! isset( $_POST['term_meta_nonce'] ) || ! wp_verify_nonce( $_POST['term_meta_nonce'], 'save_term_meta' ) ) {
+		return;
+	}
+
+	if ( isset( $_POST['_pinned'] ) ) {
+		update_term_meta( $term_id, '_pinned', 1 );
+	} else {
+		delete_term_meta( $term_id, '_pinned' );
+	}
 }
