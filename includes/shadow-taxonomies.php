@@ -15,8 +15,11 @@ add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_pinned_term
 add_action( 'init', __NAMESPACE__ . '\register_council_meeting_connect_term_meta' );
 add_action( 'council_meeting_connect_add_form_fields', __NAMESPACE__ . '\add_new_council_meeting_connect_term_meta_field' );
 add_action( 'council_meeting_connect_edit_form_fields', __NAMESPACE__ . '\edit_council_meeting_connect_term_meta_field' );
+add_action( 'quick_edit_custom_box', __NAMESPACE__ . '\council_meeting_connect_quick_edit_field', 10, 2 );
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\admin_enqueue_scripts' );
 add_action( 'edit_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
 add_action( 'create_council_meeting_connect', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
+add_action( 'edited_edition', __NAMESPACE__ . '\save_council_meeting_connect_term_meta' );
 add_filter( 'manage_edit-council_meeting_connect_columns', __NAMESPACE__ . '\council_meeting_connect_columns', 10 );
 add_filter( 'manage_council_meeting_connect_custom_column', __NAMESPACE__ . '\council_meeting_connect_pinned_column', 10, 3 );
 add_filter( 'manage_edit-council_meeting_connect_sortable_columns', __NAMESPACE__ . '\council_meeting_connect_sortable_columns' );
@@ -181,8 +184,8 @@ function register_council_meeting_connect_term_meta() {
 }
 
 /**
- * Display the checkbox for capturing `_pinned` meta to
- * the Council Meeting Connect "Add New Term" form.
+ * Display the checkbox for capturing `_pinned` meta
+ * on the Council Meeting Connect "Add New Term" form.
  *
  * @param string $taxonomy The taxonomy slug.
  */
@@ -199,7 +202,7 @@ function add_new_council_meeting_connect_term_meta_field() {
 
 /**
  * Display the checkbox for capturing `_pinned` meta
- * to the Council Meeting Connect "Edit Term" form.
+ * on the Council Meeting Connect "Edit Term" form.
  *
  * @param WP_Term $tag Current taxonomy term object.
  */
@@ -219,12 +222,58 @@ function edit_council_meeting_connect_term_meta_field( $term ) {
 }
 
 /**
+ * Display the checkbox for capturing `_pinned` meta
+ * on the Council Meeting Connect "Quick Edit" form.
+ *
+ * @param string $column_name Name of the column to edit.
+ * @param string $screen      Current screen name.
+ */
+function council_meeting_connect_quick_edit_field( $column_name, $screen ) {
+	if ( 'edit-tags' === $screen && 'pinned' === $column_name ) {
+		wp_nonce_field( 'quick_save_term_meta', 'quick_term_meta_nonce' );
+		?>
+		<fieldset>
+			<div class="inline-edit-col">
+				<label>
+					<input type="checkbox" name="_pinned" />
+					<?php esc_html_e( 'Pin to top of "Council Meeting Connect" panel', 'pfmc-feature-set' ); ?>
+				</label>
+			</div>
+		</fieldset>
+		<?php
+	}
+}
+
+/**
+ * Enqueue script for displaying current Pinned status
+ * on the Council Meeting Connect "Quick Edit" form.
+ *
+ * @param string $hook_suffix The current admin page.
+ */
+function admin_enqueue_scripts( $hook_suffix ) {
+	if ( 'edit-tags.php' === $hook_suffix && 'edit-council_meeting_connect' === get_current_screen()->id ) {
+		$asset_data = require_once dirname( __DIR__ ) . '/js/build/council-meeting-connect-panel.asset.php';
+
+		wp_enqueue_script(
+			'pfmc-council-meeting-connect-quick-edit',
+			plugins_url( 'js/build/council-meeting-connect-quick-edit.js', dirname( __FILE__ ) ),
+			$asset_data['dependencies'],
+			$asset_data['version'],
+			true
+		);
+	}
+}
+
+/**
  * Save `_pinned` term meta.
  *
  * @param int $term_id Term ID.
  */
 function save_council_meeting_connect_term_meta( $term_id ) {
-	if ( ! isset( $_POST['term_meta_nonce'] ) || ! wp_verify_nonce( $_POST['term_meta_nonce'], 'save_term_meta' ) ) {
+	if (
+		( ! isset( $_POST['term_meta_nonce'] ) || ! wp_verify_nonce( $_POST['term_meta_nonce'], 'save_term_meta' ) )
+		&& ( ! isset( $_POST['quick_term_meta_nonce'] ) || ! wp_verify_nonce( $_POST['quick_term_meta_nonce'], 'quick_save_term_meta' ) )
+	) {
 		return;
 	}
 
