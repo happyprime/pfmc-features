@@ -19,14 +19,12 @@ jobs:
         chmod 600 ${HOME}/.ssh/*
         eval `ssh-agent -s`
         ssh-add ${HOME}/.ssh/id_rsa
-
     - name: Sync theme directory
       run: |
-        rsync -chav --delete \
-        -e "ssh -p ${{secrets.MISSING_DEPLOY_PORT}} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+        rsync -rcvzh --chmod=Dug=rwx,Do=rx,Fug=rw,Fo=r --delete \
+        -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
         --exclude-from=.deploy_ignore \
-        ./ ${{secrets.MISSING_DEPLOY_USER}}@${{secrets.MISSING_DEPLOY_HOST}}:${{secrets.DEPLOY_PATH}}
-
+        ./ ${{secrets.MISSING_DEPLOY_USER}}@${{secrets.MISSING_DEPLOY_HOST}}:${{secrets.STAGING_DEPLOY_PATH}}
     - name: Successful deployment Slack notification
       if: success()
       uses: wearerequired/slack-messaging-action@v1
@@ -36,27 +34,9 @@ jobs:
         payload: >-
           {
             "icon_emoji": ":shipit:",
-            "username": "Happy Prime Deployment Bot",
-            "attachments": [
-                {
-                    "author_name": "${{ github.event.sender.login }}",
-                    "author_link": "${{ github.event.sender.html_url }}",
-                    "author_icon": "${{ github.event.sender.avatar_url }}",
-                    "color": "good",
-                    "fallback": "Deployment from the develop branch to https://pcouncil.missingcolors.com complete.",
-                    "pretext": "Deployment from the `develop` branch to https://pcouncil.missingcolors.com complete.",
-                    "fields": [
-                        {
-                          "title": "Deployed revision",
-                          "value": "<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}@${{ github.ref }}>",
-                          "short": true
-                        }
-                    ],
-                    "footer": "<https://github.com/${{ github.repository }}|${{ github.repository }}>"
-                }
-            ]
+            "username": "Happy Prime Deployment: ${{ github.event.sender.login }}",
+            "text": ":white_check_mark: Deployment from the <https://github.com/${{ github.repository }}|${{ github.repository }}> `develop` branch to https://pcouncil.missingcolors.com complete."
           }
-
     - name: Deployment failed Slack notification
       if: failure()
       uses: wearerequired/slack-messaging-action@v1
@@ -66,23 +46,6 @@ jobs:
         payload: >-
           {
             "icon_emoji": ":shipit:",
-            "username": "Happy Prime Deployment Bot",
-            "attachments": [
-                {
-                    "author_name": "${{ github.event.sender.login }}",
-                    "author_link": "${{ github.event.sender.html_url }}",
-                    "author_icon": "${{ github.event.sender.avatar_url }}",
-                    "color": "#ff0000",
-                    "fallback": "Deployment from the develop branch to https://pcouncil.missingcolors.com has failed.",
-                    "pretext": "Deployment from the `develop` branch to https://pcouncil.missingcolors.com has failed.",
-                    "fields": [
-                        {
-                          "title": "Deployed revision",
-                          "value": "<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}@${{ github.ref }}>",
-                          "short": true
-                        }
-                    ],
-                    "footer": "<https://github.com/${{ github.repository }}|${{ github.repository }}>"
-                }
-            ]
+            "username": "Happy Prime Deployment: ${{ github.event.sender.login }}",
+            "text": ":large_red_square: Deployment from the <https://github.com/${{ github.repository }}|${{ github.repository }}> `develop` branch to https://pcouncil.missingcolors.com failed."
           }
