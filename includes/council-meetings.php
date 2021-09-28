@@ -353,7 +353,7 @@ function enqueue_draggable_assets( $pagename ) {
 		wp_enqueue_style( 'dragdrop-select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css', array(), '4.0.3' );
 		wp_enqueue_script( 'jquery-ui-sortable' );
 		wp_enqueue_script( 'dragdrop-select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', array(), '4.0.3', true );
-		wp_enqueue_script( 'dragdrop-script', 'https://pcouncil.test/wp-content/plugins/pfmc-feature-set/js/metabox-draggable.js', array( 'jquery' ), '1.0', true );
+		wp_enqueue_script( 'dragdrop-script', plugins_url( '/js/build/metabox-draggable.js', dirname( __FILE__ ) ), array( 'jquery' ), '1.0', true );
 	}
 }
 
