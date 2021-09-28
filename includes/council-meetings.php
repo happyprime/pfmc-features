@@ -350,10 +350,11 @@ function fixdragdrop_item_order( $post_array ) {
 function enqueue_draggable_assets( $pagename ) {
 	global $typenow;
 	if ( ( 'post.php' === $pagename || 'post-new.php' === $pagename ) && 'council_meeting' === $typenow ) {
+		$asset_data = require_once dirname( __DIR__ ) . '/js/build/metabox-draggable.asset.php';
 		wp_enqueue_style( 'dragdrop-select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css', array(), '4.0.3' );
 		wp_enqueue_script( 'jquery-ui-sortable' );
 		wp_enqueue_script( 'dragdrop-select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', array(), '4.0.3', true );
-		wp_enqueue_script( 'dragdrop-script', plugins_url( '/js/build/metabox-draggable.js', dirname( __FILE__ ) ), array( 'jquery' ), '1.0', true );
+		wp_enqueue_script( 'dragdrop-script', plugins_url( '/js/build/metabox-draggable.js', dirname( __FILE__ ) ), array( 'jquery' ), $asset_data['version'], true );
 	}
 }
 
