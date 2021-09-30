@@ -8,6 +8,7 @@
 namespace PFMCFS\Post_Type\Council_Meetings;
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type', 10 );
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_draggable_assets' );
 add_action( 'save_post_council_meeting', __NAMESPACE__ . '\save_meta', 1 );
 add_action( 'save_post_council_meeting', __NAMESPACE__ . '\create_event', 10, 2 );
 add_action( 'wp_trash_post', __NAMESPACE__ . '\delete_event', 10 );
@@ -255,27 +256,105 @@ function council_meeting_location( $post ) {
 function council_meeting_documents( $post ) {
 	$documents = get_post_meta( $post->ID, 'council_meeting_documents', true );
 	$count     = 0;
+	?>
+	<div class="dragdrop-sortable-content">
+		<ul id="dragdrop-sortable">
+			<?php
+			if ( is_array( $documents ) && ! empty( $documents ) ) {
+				foreach ( $documents as $index => $item ) {
+					$count++;
+					?>
+					<li class="ui-state-default single-sortable-item">
+						<div class="dragdrop-sortable-item closed">
+							<div class="dragdrop-sortable-item-header">
+								<h3 class="hndle">Document <span class="dragdrop-item-count"><?php echo esc_html( $count ); ?></span></h3>
+							</div>
+							<div class="dragdrop-sortable-item-body">
+								<table class="wp-list-table widefat fixed striped">
+									<thead>
+										<tr>
+											<th>Title</th>
+											<th>URL</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td><input type="text" class="widefat" name="council_meeting_documents[<?php echo esc_html( $index ); ?>][title]" value="<?php echo empty( $item['title'] ) ? '' : esc_html( $item['title'] ); ?>"></td>
+											<td><input type="text" class="widefat" name="council_meeting_documents[<?php echo esc_html( $index ); ?>][url]" value="<?php echo empty( $item['url'] ) ? '' : esc_html( $item['url'] ); ?>"></td>
+										</tr>
+									</tbody>
+								</table>
+								<div class="dragdrop-sortable-item-bottom">
+									<button type="button" class="button remove-dragdrop-sortable">Remove Document <span class="dragdrop-item-count"><?php echo esc_html( $count ); ?></span></button>
+								</div>
+							</div>
+							<input type="hidden" name="council_meeting_documents[<?php echo esc_html( $index ); ?>][order]" value="<?php echo esc_html( $index ); ?>" class="dragdrop-set-order">
+						</div>
+					</li>
+					<?php
+				}
+			} else { // If array is empty or not set
+				?>
+				<li class="ui-state-default single-sortable-item">
+					<div class="dragdrop-sortable-item">
+						<div class="dragdrop-sortable-item-header">
+							<h3 class="hndle">Document Name <span class="dragdrop-item-count">1</span></h3>
+						</div>
+						<div class="dragdrop-sortable-item-body">
+							<table class="wp-list-table widefat fixed striped pages">
+								<thead>
+									<tr>
+										<th>Title</th>
+										<th>URL</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><input type="text" class="widefat" name="council_meeting_documents[0][title]"></td>
+										<td><input type="text" class="widefat" name="council_meeting_documents[0][url]"></td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="dragdrop-sortable-item-bottom">
+								<button type="button" class="button remove-dragdrop-sortable">Remove Document <span class="dragdrop-item-count"><?php echo esc_html( $count ); ?></span></button>
+							</div>
+						</div>
+						<input type="hidden" name="council_meeting_documents[0][order]" value="0" class="dragdrop-set-order">
+					</div>
+				</li>
+				<?php
+			}
+			?>
+		</ul>
+		<button type="button" class="button add-dragdrop-sortable">Add Document</button>
+	</div>
+	<?php
+}
 
-	if ( ! is_array( $documents ) ) {
-		$documents = array();
+/**
+ * DRAGGABLE Sort the documents by numeric order.
+ */
+function fixdragdrop_item_order( $post_array ) {
+	$makearray = array();
+	foreach ( $post_array as $item_array ) {
+		$key               = $item_array['order'];
+		$makearray[ $key ] = $item_array;
 	}
+	ksort( $makearray, SORT_NUMERIC );
+	return $makearray;
+}
 
-	while ( $count < 5 ) {
-		if ( isset( $documents[ $count ] ) ) {
-			$document_title = $documents[ $count ]['title'];
-			$document_url   = $documents[ $count ]['url'];
-		} else {
-			$document_title = '';
-			$document_url   = '';
-		}
-
-		?>
-		<h3>Document <?php echo absint( $count + 1 ); ?></h3>
-		<label>Title: <input type="text" name="council_meeting_documents[<?php echo absint( $count ); ?>][title]" value="<?php echo esc_attr( $document_title ); ?>" /></label><br />
-		<label>URL: <input type="text" name="council_meeting_documents[<?php echo absint( $count ); ?>][url]" value="<?php echo esc_attr( $document_url ); ?>" /></label>
-		<?php
-
-		$count++;
+/**
+ * Document meta script and stylesheet.
+ */
+function enqueue_draggable_assets( $pagename ) {
+	global $typenow;
+	if ( ( 'post.php' === $pagename || 'post-new.php' === $pagename ) && 'council_meeting' === $typenow ) {
+		$asset_data = require_once dirname( __DIR__ ) . '/js/build/metabox-draggable.asset.php';
+		wp_enqueue_style( 'dragdrop-select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css', array(), '4.0.3' );
+		wp_enqueue_script( 'jquery-ui-sortable' );
+		wp_enqueue_script( 'dragdrop-select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', array(), '4.0.3', true );
+		wp_enqueue_script( 'dragdrop-script', plugins_url( '/js/build/metabox-draggable.js', dirname( __FILE__ ) ), array( 'jquery' ), $asset_data['version'], true );
 	}
 }
 
@@ -328,8 +407,9 @@ function save_meta( $post_id ) {
 	}
 
 	if ( isset( $_POST['council_meeting_documents'] ) && is_array( $_POST['council_meeting_documents'] ) ) {
+		$docs_in_order   = fixdragdrop_item_order( $_POST['council_meeting_documents'] );
 		$store_documents = array();
-		foreach ( $_POST['council_meeting_documents'] as $document ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		foreach ( $docs_in_order as $document ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$title = '';
 			$url   = '';
 
