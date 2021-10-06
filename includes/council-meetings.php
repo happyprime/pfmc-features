@@ -270,20 +270,8 @@ function council_meeting_documents( $post ) {
 								<h3 class="hndle">Document <span class="dragdrop-item-count"><?php echo esc_html( $count ); ?></span></h3>
 							</div>
 							<div class="dragdrop-sortable-item-body">
-								<table class="wp-list-table widefat fixed striped">
-									<thead>
-										<tr>
-											<th>Title</th>
-											<th>URL</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td><input type="text" class="widefat" name="council_meeting_documents[<?php echo esc_html( $index ); ?>][title]" value="<?php echo empty( $item['title'] ) ? '' : esc_html( $item['title'] ); ?>"></td>
-											<td><input type="text" class="widefat" name="council_meeting_documents[<?php echo esc_html( $index ); ?>][url]" value="<?php echo empty( $item['url'] ) ? '' : esc_html( $item['url'] ); ?>"></td>
-										</tr>
-									</tbody>
-								</table>
+								<label for="council_meeting_documents[<?php echo esc_html( $index ); ?>][title]">Document <?php echo esc_html( $count ); ?> Title <input type="text" class="widefat" name="council_meeting_documents[<?php echo esc_html( $index ); ?>][title]" id="council_meeting_documents[<?php echo esc_html( $index ); ?>][title]" value="<?php echo empty( $item['title'] ) ? '' : esc_html( $item['title'] ); ?>"></label>
+								<label for="council_meeting_documents[<?php echo esc_html( $index ); ?>][url]">Document <?php echo esc_html( $count ); ?> URL <input type="text" class="widefat" name="council_meeting_documents[<?php echo esc_html( $index ); ?>][url]" id="council_meeting_documents[<?php echo esc_html( $index ); ?>][url]" value="<?php echo empty( $item['url'] ) ? '' : esc_html( $item['url'] ); ?>"></label>
 								<div class="dragdrop-sortable-item-bottom">
 									<button type="button" class="button remove-dragdrop-sortable">Remove Document <span class="dragdrop-item-count"><?php echo esc_html( $count ); ?></span></button>
 								</div>
@@ -301,20 +289,8 @@ function council_meeting_documents( $post ) {
 							<h3 class="hndle">Document Name <span class="dragdrop-item-count">1</span></h3>
 						</div>
 						<div class="dragdrop-sortable-item-body">
-							<table class="wp-list-table widefat fixed striped pages">
-								<thead>
-									<tr>
-										<th>Title</th>
-										<th>URL</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td><input type="text" class="widefat" name="council_meeting_documents[0][title]"></td>
-										<td><input type="text" class="widefat" name="council_meeting_documents[0][url]"></td>
-									</tr>
-								</tbody>
-							</table>
+							<label for="council_meeting_documents[0][title]">Document 1 Title <input type="text" class="widefat" name="council_meeting_documents[0][title]" id="council_meeting_documents[0][title]" value="<?php echo empty( $item['title'] ) ? '' : esc_html( $item['title'] ); ?>"></label>
+							<label for="council_meeting_documents[0][url]">Document 1 URL <input type="text" class="widefat" name="council_meeting_documents[0][url]" id="council_meeting_documents[0][url]" value="<?php echo empty( $item['url'] ) ? '' : esc_html( $item['url'] ); ?>"></label>
 							<div class="dragdrop-sortable-item-bottom">
 								<button type="button" class="button remove-dragdrop-sortable">Remove Document <span class="dragdrop-item-count"><?php echo esc_html( $count ); ?></span></button>
 							</div>
