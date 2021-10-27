@@ -101,6 +101,7 @@ function display_alert_meta_box( $post ) {
 	$level = ( $level ) ? $level : 'low';
 
 	// Set the default minimum as today.
+	// Seconds are intentionally left out for nicer display in the time input.
 	$through_default = explode( ' ', gmdate( 'Y-m-d H:i' ) );
 
 	// Set the default "Display alert through" value as one day from now.
