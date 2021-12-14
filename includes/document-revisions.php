@@ -2,7 +2,7 @@
 /**
  * Custom handling for the WP Document Revisions plugin.
  *
- * @package PFMC_Feature_Set
+ * @package PFMC_Features
  */
 
 namespace PFMCFS\WP_Document_Revisions;

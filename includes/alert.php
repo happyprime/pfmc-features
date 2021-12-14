@@ -2,7 +2,7 @@
 /**
  * Handling for the Alert bar.
  *
- * @package PFMC_Feature_Set
+ * @package PFMC_Features
  */
 
 namespace PFMCFS\Alert;

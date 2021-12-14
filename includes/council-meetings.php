@@ -2,7 +2,7 @@
 /**
  * Handling for the Council Meeting post type.
  *
- * @package PFMC_Feature_Set
+ * @package PFMC_Features
  */
 
 namespace PFMCFS\Post_Type\Council_Meetings;
