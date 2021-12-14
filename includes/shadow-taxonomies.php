@@ -2,7 +2,7 @@
 /**
  * Handling for the shadow taxonomy functionality.
  *
- * @package PFMC_Feature_Set
+ * @package PFMC_Features
  */
 
 namespace PFMCFS\Shadow_Taxonomies;

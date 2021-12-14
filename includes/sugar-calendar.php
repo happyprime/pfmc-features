@@ -2,7 +2,7 @@
 /**
  * Custom handling of Sugar Calendar plugin.
  *
- * @package PFMC_Feature_Set
+ * @package PFMC_Features
  */
 
 namespace PFMCFS\SugarCalendar;

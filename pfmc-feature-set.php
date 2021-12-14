@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       PFMC Feature Set
+ * Plugin Name:       PFMC Features
  * Plugin URI:        https://github.com/happyprime/pfmc-feature-set
  * GitHub Plugin URI: https://github.com/happyprime/pfmc-feature-set
  * Primary Branch:    release
@@ -9,7 +9,7 @@
  * Author URI:        https://happyprime.co
  * Version:           0.2.0
  *
- * @package     PFMC_Feature_Set
+ * @package     PFMC_Features
  */
 
 // If this file is called directly, abort.
