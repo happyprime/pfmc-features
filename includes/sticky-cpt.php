@@ -2,7 +2,7 @@
 /**
  * Sticky support handling for custom post types.
  *
- * @package PFMC_Feature_Set
+ * @package PFMC_Features
  */
 
 namespace PFMCFS\CPT_Sticky_Support;

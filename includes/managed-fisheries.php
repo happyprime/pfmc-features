@@ -2,7 +2,7 @@
 /**
  * Handling for the Managed Fishery post type.
  *
- * @package PFMC_Feature_Set
+ * @package PFMC_Features
  */
 
 namespace PFMCFS\Post_Type\Managed_Fisheries;
