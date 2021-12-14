@@ -1,11 +1,13 @@
 <?php
 /**
- * Plugin Name: PFMC Feature Set
- * Plugin URI:  https://github.com/happyprime/pfmc-feature-set
- * Description: Custom features for the Pacific Fishery Management Council website.
- * Author:      Happy Prime
- * Author URI:  https://happyprime.co
- * Version:     0.2.0
+ * Plugin Name:       PFMC Feature Set
+ * Plugin URI:        https://github.com/happyprime/pfmc-feature-set
+ * GitHub Plugin URI: https://github.com/happyprime/pfmc-feature-set
+ * Primary Branch:    release
+ * Description:       Custom features for the Pacific Fishery Management Council website.
+ * Author:            Happy Prime
+ * Author URI:        https://happyprime.co
+ * Version:           0.2.0
  *
  * @package     PFMC_Feature_Set
  */
@@ -37,7 +39,7 @@ if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
  * @return string Current alert transient key.
  */
 function get_pfmc_alert_transient_key() {
-	return 'pfmc_alert_data_002';
+	return 'pfmc_alert_data_003';
 }
 
 require_once __DIR__ . '/includes/managed-fisheries.php';
