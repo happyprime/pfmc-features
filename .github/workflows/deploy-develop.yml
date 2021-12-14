@@ -19,7 +19,7 @@ jobs:
         chmod 600 ${HOME}/.ssh/*
         eval `ssh-agent -s`
         ssh-add ${HOME}/.ssh/id_rsa
-    - name: Sync theme directory
+    - name: Sync plugin directory
       run: |
         rsync -rcvzh --chmod=Dug=rwx,Do=rx,Fug=rw,Fo=r --delete \
         -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
