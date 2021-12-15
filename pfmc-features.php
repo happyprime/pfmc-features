@@ -1,9 +1,7 @@
 <?php
 /**
  * Plugin Name:       PFMC Features
- * Plugin URI:        https://github.com/happyprime/pfmc-feature-set
- * GitHub Plugin URI: https://github.com/happyprime/pfmc-feature-set
- * Primary Branch:    release
+ * Plugin URI:        https://github.com/happyprime/pfmc-features
  * Description:       Custom features for the Pacific Fishery Management Council website.
  * Author:            Happy Prime
  * Author URI:        https://happyprime.co

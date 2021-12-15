@@ -4,7 +4,9 @@
   "description": "Custom features for pcouncil.org.",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
-    "@wordpress/scripts": "^13.0.3"
+    "@samkirkland/ftp-deploy": "^1.1.1",
+    "@wordpress/scripts": "^13.0.3",
+    "prompt": "^1.2.0"
   },
   "scripts": {
     "start": "wp-scripts start js/*.js --output-path=js/build/",

@@ -1,0 +1,191 @@
+{
+    "description": "DO NOT DELETE THIS FILE. This file is used to keep track of which files have been synced in the most recent deployment. If you delete this file a resync will need to be done (which can take a while) - read more: https://github.com/SamKirkland/FTP-Deploy-Action",
+    "version": "1.0.0",
+    "generatedTime": 1639531001095,
+    "data": [
+        {
+            "type": "file",
+            "name": "README.md",
+            "size": 53,
+            "hash": "1528c857d264f20981d6ef93205a7d0bd4576ba552798ba13885d52953b6fe2d"
+        },
+        {
+            "type": "folder",
+            "name": "css"
+        },
+        {
+            "type": "folder",
+            "name": "includes"
+        },
+        {
+            "type": "folder",
+            "name": "js"
+        },
+        {
+            "type": "file",
+            "name": "pfmc-features.php",
+            "size": 1664,
+            "hash": "2e9513769d8f971e39ed91412f8602f7567aea6f69720ff027f579837bccbbb1"
+        },
+        {
+            "type": "file",
+            "name": "css/sticky-inline-edit.css",
+            "size": 100,
+            "hash": "5b325e6d05456c0ab9067449a23841b1fefd6da5755d10c307434cde1e1898a1"
+        },
+        {
+            "type": "file",
+            "name": "includes/actions.php",
+            "size": 3644,
+            "hash": "13eebe989ddec1ffb9b5305a7d41e040a0272245a7fd970921ade3ea9f1927af"
+        },
+        {
+            "type": "file",
+            "name": "includes/alert.php",
+            "size": 8938,
+            "hash": "5b6380dfc4ea50d742229a06c9d889ac2e33bdc8da1de0c85591fdd2e4b1c5a9"
+        },
+        {
+            "type": "file",
+            "name": "includes/analytics.php",
+            "size": 675,
+            "hash": "c88b37b50b90906be4ddd0fdfc4dd0425cbab332b28bdd928cbe601bca927cb6"
+        },
+        {
+            "type": "file",
+            "name": "includes/council-meetings.php",
+            "size": 29857,
+            "hash": "7ed8c4252546d4e905a7417da65f5e1e7cbaa02f669cca912d5196218e0023af"
+        },
+        {
+            "type": "file",
+            "name": "includes/document-revisions.php",
+            "size": 3054,
+            "hash": "76fd2c98dc969f093ea7d514be6838d24f6be6572dfb15bbd20cc50e9e43cf3e"
+        },
+        {
+            "type": "file",
+            "name": "includes/managed-fisheries.php",
+            "size": 2030,
+            "hash": "cc73a38f4e658ad7cd1227f552f6837ee5ac438353a0859a05e3026af957712b"
+        },
+        {
+            "type": "file",
+            "name": "includes/media.php",
+            "size": 1258,
+            "hash": "383a840af92764dc083fc3afd2e78ac73887ef49e5f18d58671a54f708d8cfeb"
+        },
+        {
+            "type": "file",
+            "name": "includes/shadow-taxonomies.php",
+            "size": 12126,
+            "hash": "9b43a082b6a6c6997c1142af4da718a9d684583eb71a999a602eefbcdb13e38a"
+        },
+        {
+            "type": "file",
+            "name": "includes/sticky-cpt.php",
+            "size": 8230,
+            "hash": "a6d7ab2482c2b48847c2b77325e8ef1fa317b50475722d70e386242081df0366"
+        },
+        {
+            "type": "file",
+            "name": "includes/sugar-calendar.php",
+            "size": 20634,
+            "hash": "26a577c93127f66bb7f6de8c2909526eb8a267e1dcc5be4a007dad432669fd0e"
+        },
+        {
+            "type": "folder",
+            "name": "js/build"
+        },
+        {
+            "type": "file",
+            "name": "js/council-meeting-connect-panel.js",
+            "size": 1798,
+            "hash": "048b36ba59758cc01d3161c581ecbb1787f79d4f71da518393cda6ebb1e3bd96"
+        },
+        {
+            "type": "file",
+            "name": "js/council-meeting-connect-quick-edit.js",
+            "size": 720,
+            "hash": "e15a8f44d74f7c0696a3019d35b75b6f7d28d4be42ea7f58823faab945312775"
+        },
+        {
+            "type": "file",
+            "name": "js/metabox-draggable.js",
+            "size": 3232,
+            "hash": "7b68ef5059cd7255ad6a89f8e3f4298f648364c3f0f47803d70bc0f1c5066e4a"
+        },
+        {
+            "type": "file",
+            "name": "js/sticky-checkbox.js",
+            "size": 1524,
+            "hash": "bcd613d497acba399db94b94249fc04daf09b98a355ad4031c8ffe6a6bcdfded"
+        },
+        {
+            "type": "file",
+            "name": "js/sticky-inline-edit.js",
+            "size": 3067,
+            "hash": "284e2f030249f9030254baf515aea85da248fb6b28bd30eaf31a39675c005cf9"
+        },
+        {
+            "type": "file",
+            "name": "js/build/council-meeting-connect-panel.asset.php",
+            "size": 173,
+            "hash": "254a6ab88b82bac4cc0eb983c3391bc90f626dad76d5400421e3a7b8ee82387a"
+        },
+        {
+            "type": "file",
+            "name": "js/build/council-meeting-connect-panel.js",
+            "size": 3559,
+            "hash": "cff3d59081562ce772f4768f026130f292c2faf76322c17e52948f02d9368bef"
+        },
+        {
+            "type": "file",
+            "name": "js/build/council-meeting-connect-quick-edit.asset.php",
+            "size": 108,
+            "hash": "010bf1109bca71885b24d4b59914aba8660901545ba095ac3c8c62df0e305f5a"
+        },
+        {
+            "type": "file",
+            "name": "js/build/council-meeting-connect-quick-edit.js",
+            "size": 1714,
+            "hash": "dfb2edf6f73eb9a684bae2358a6d68c5a079b7e1586676daf10eb2dc7af69778"
+        },
+        {
+            "type": "file",
+            "name": "js/build/metabox-draggable.asset.php",
+            "size": 108,
+            "hash": "f6cc6ce8b7b0b83b5b79d5ecfa4839b0553d9eb1976cf054a19c0e17baf14231"
+        },
+        {
+            "type": "file",
+            "name": "js/build/metabox-draggable.js",
+            "size": 3174,
+            "hash": "fc5ddfcf7f5bd7dc4c3d1ebcdf192d64ae41eed32689e14a027d4992189b05df"
+        },
+        {
+            "type": "file",
+            "name": "js/build/sticky-checkbox.asset.php",
+            "size": 122,
+            "hash": "3171db0949b30b074ab17f264a1ed859a7ece88c3e2e81c6412e296d700398ff"
+        },
+        {
+            "type": "file",
+            "name": "js/build/sticky-checkbox.js",
+            "size": 1727,
+            "hash": "0d37f86ad7b9198f09f7d49795278568705be05a3c44a58bbd57e76fe268d896"
+        },
+        {
+            "type": "file",
+            "name": "js/build/sticky-inline-edit.asset.php",
+            "size": 108,
+            "hash": "0e1b498e02224941732cff862bb53d609eb499cc3086c161dfefc5fd1dc441c9"
+        },
+        {
+            "type": "file",
+            "name": "js/build/sticky-inline-edit.js",
+            "size": 2640,
+            "hash": "788b67cf3b1ca3ae147904296fd21ef780ad939c115b16905ac077a60967e458"
+        }
+    ]
+}
