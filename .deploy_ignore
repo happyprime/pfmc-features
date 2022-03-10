@@ -1,4 +1,5 @@
 .deploy_ignore
+.distignore
 .gitignore
 README.md
 /.git/
