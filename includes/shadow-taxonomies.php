@@ -8,8 +8,12 @@
 namespace PFMCFS\Shadow_Taxonomies;
 
 add_action( 'init', __NAMESPACE__ . '\register_taxonomies', 10 );
-add_action( 'save_post_managed_fishery', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
-add_action( 'save_post_council_meeting', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
+
+add_action( 'publish_managed_fishery', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
+add_action( 'publish_council_meeting', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
+add_action( 'draft_managed_fishery', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
+add_action( 'draft_council_meeting', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
+
 add_filter( 'get_the_archive_title', __NAMESPACE__ . '\filter_managed_fishery_connect_archive_title', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_pinned_term_script' );
 add_action( 'init', __NAMESPACE__ . '\register_council_meeting_connect_term_meta' );
@@ -105,20 +109,8 @@ function register_taxonomies() {
  * @param WP_Post $post    Post object.
  */
 function update_shadow_taxonomy( $post_id, $post ) {
-
-	// If we're running an auto-save, don't create a term.
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
-	}
-
-	// Don't create a term the post is not published or it has no title.
-	if ( 'publish' !== $post->post_status || '' === $post->post_title ) {
-		return;
-	}
-
-	// If `post_date` and `post_modified` aren't equal,
-	// don't create a term because this must be an update.
-	if ( $post->post_date !== $post->post_modified ) {
+	// Don't create a term if the post has no title.
+	if ( '' === $post->post_title ) {
 		return;
 	}
 
@@ -131,7 +123,34 @@ function update_shadow_taxonomy( $post_id, $post ) {
 	}
 
 	// Create a new term using the title of this post as a name.
-	wp_insert_term( $post->post_title, $taxonomy );
+	$new_term = wp_insert_term( $post->post_title, $taxonomy );
+}
+
+/**
+ * When a `managed_fishery` or `council_meeting` post is moved
+ * to Draft, remove the term in its respective shadow taxonomy.
+ *
+ * @uses get_term_by()
+ * @uses wp_delete_term()
+ *
+ * @param int     $post_id The post ID.
+ * @param WP_Post $post    Post object.
+ */
+function remove_shadow_taxonomy( $post_id, $post ) {
+	// Don't try to remove a term if the post has no title.
+	if ( '' === $post->post_title ) {
+		return;
+	}
+
+	// Build the shadow taxonomy slug using the post type slug.
+	$taxonomy = "{$post->post_type}_connect";
+
+	// See if there is a term with the same name as this post title.
+	$term_object = get_term_by( 'name', $post->post_title, $taxonomy );
+	if ( $term_object ) {
+		// Remove the term.
+		wp_delete_term( $term_object->term_id, $taxonomy );
+	}
 }
 
 /**
