@@ -21,6 +21,10 @@ add_action( 'template_redirect', __NAMESPACE__ . '\redirect_event_generated_post
 add_action( 'pre_get_posts', __NAMESPACE__ . '\filter_managed_fisheries_connect_query', 1000 );
 add_filter( 'the_content', __NAMESPACE__ . '\remove_content_hooks', 9 );
 add_filter( 'the_excerpt', __NAMESPACE__ . '\remove_content_hooks', 9 );
+add_filter( 'query_vars', __NAMESPACE__ . '\add_query_vars' );
+add_filter( 'template_include', __NAMESPACE__ . '\include_template' );
+add_action( 'sc_event_details', __NAMESPACE__ . '\add_ics_link', 11 );
+add_action( 'pfmc_before_entry_content', __NAMESPACE__ . '\add_ics_link' );
 
 /**
  * Expose the `sc_event` post type in the REST API.
@@ -665,4 +669,51 @@ function remove_content_hooks( $content ) {
 	}
 
 	return $content;
+}
+
+/**
+ * Add a query variable to use for generating an `.ics` file.
+ *
+ * @param array $vars Allowed query variables.
+ * @return array
+ */
+function add_query_vars( $vars ) {
+	$vars[] = 'pfmc_sc_event_ics';
+	$vars[] = 'pfmc_sc_event_id';
+
+	return $vars;
+}
+
+/**
+ * Generate an `.ics` file for an event.
+ *
+ * @param string $template The path of the template to include.
+ * @return string
+ */
+function include_template( $template ) {
+	if ( get_query_var( 'pfmc_sc_event_ics' ) && get_query_var( 'pfmc_sc_event_id' ) ) {
+		$template = dirname( __DIR__ ) . '/templates/ics.php';
+	}
+
+	return $template;
+}
+
+/**
+ * Add an `Add to calendar` link to single event views.
+ *
+ * @param int $post_id ID of the event post.
+ */
+function add_ics_link( $post_id ) {
+	$ics_link = add_query_arg(
+		array(
+			'pfmc_sc_event_ics' => true,
+			'pfmc_sc_event_id'  => $post_id,
+		),
+		get_permalink()
+	);
+	?>
+	<div class="sc_event_add_to_calendar">
+		<a href="<?php echo esc_url( $ics_link ); ?>"><?php esc_html_e( 'Add to calendar', 'pfmc' ); ?></a>
+	</div>
+	<?php
 }
