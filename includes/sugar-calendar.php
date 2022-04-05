@@ -25,6 +25,7 @@ add_filter( 'query_vars', __NAMESPACE__ . '\add_query_vars' );
 add_filter( 'template_include', __NAMESPACE__ . '\include_template' );
 add_action( 'sc_event_details', __NAMESPACE__ . '\add_ics_link', 11 );
 add_action( 'pfmc_council_meeting_meta', __NAMESPACE__ . '\add_ics_link' );
+add_action( 'init', __NAMESPACE__ . '\adjust_date_time_details' );
 
 /**
  * Expose the `sc_event` post type in the REST API.
@@ -715,5 +716,94 @@ function add_ics_link( $post_id ) {
 	<div class="sc_event_add_to_calendar">
 		<a href="<?php echo esc_url( $ics_link ); ?>"><?php esc_html_e( 'Add to calendar', 'pfmc' ); ?></a>
 	</div>
+	<?php
+}
+
+/**
+ * Manage hooks for the display of event date and time details.
+ */
+function adjust_date_time_details() {
+	remove_action( 'sc_event_details', 'sc_add_date_time_details' );
+	add_action( 'sc_event_details', __NAMESPACE__ . '\add_date_time_details' );
+}
+
+/**
+ * Display date and time details for an event.
+ *
+ * @param int $post_id Post ID
+ */
+function add_date_time_details( $post_id = 0 ) {
+	$event      = sugar_calendar_get_event_by_object( $post_id );
+	$all_day    = $event->is_all_day();
+	$start      = $event->start ?? false;
+	$end        = $event->end ?? false;
+
+	?>
+	<div class="sc_event_date">
+		<?php echo esc_html__( 'Date:', 'pfmc' ) . ' ' . sc_get_event_date( $post_id ); ?>
+	</div>
+	<?php
+
+	// If the event is all day or spans multiple days, stop here.
+	if ( $all_day || ( $start && $end && explode( ' ', $start )[0] !== explode( ' ', $end )[0] ) ) {
+		return;
+	}
+
+	$start_time = sc_get_event_start_time( $post_id );
+
+	// If the event has no start time, stop here.
+	if ( empty( $start_time ) ) {
+		return;
+	}
+
+	// The rest of this is from `sc_add_date_time_details`, slightly reformatted.
+	$end_time = sc_get_event_end_time( $post_id );
+	$format   = 'Y-m-d\TH:i:s';
+	$tz       = 'floating';
+
+	// Add the time zone offset to the format if the event has time zone data.
+	if ( ! empty( $event->start_tz ) && ( $end_time !== $start_time ) ) {
+		$offset = sugar_calendar_get_timezone_offset( array(
+			'time'     => $event->start,
+			'timezone' => $event->start_tz
+		) );
+		$format = "Y-m-d\TH:i:s{$offset}";
+		$tz     = $event->start_tz;
+	}
+
+	$dt = $event->start_date( $format );
+
+	?>
+	<div class="sc_event_time">
+		<span class="sc_event_start_time">
+			<?php esc_html_e( 'Time:', 'sugar-calendar' ); ?>
+			<time datetime="<?php echo esc_attr( $dt ); ?>" title="<?php echo esc_attr( $dt ); ?>" data-timezone="<?php echo esc_attr( $tz ); ?>"><?php echo esc_html( $start_time );?></time>
+		</span>
+	<?php
+
+	if ( ! empty( $end_time ) && ( $end_time !== $start_time ) ) {
+
+		// Add the time zone offset to the format if the event has time zone data.
+		if ( ! empty( $event->end_tz ) ) {
+			$offset = sugar_calendar_get_timezone_offset( array(
+				'time'     => $event->end,
+				'timezone' => $event->end_tz
+			) );
+			$format = "Y-m-d\TH:i:s{$offset}";
+			$tz = $event->end_tz;
+		}
+
+		$dt = $event->end_date( $format );
+
+		?>
+		<span class="sc_event_time_sep"><?php esc_html_e( 'to', 'sugar-calendar' ); ?></span>
+		<span class="sc_event_end_time">
+			<time datetime="<?php echo esc_attr( $dt ); ?>" title="<?php echo esc_attr( $dt ); ?>" data-timezone="<?php echo esc_attr( $tz ); ?>"><?php echo esc_html( $end_time ); ?></time>
+		</span>
+		<?php
+
+	}
+	?>
+	</div><!-- .sc_event_time -->
 	<?php
 }
