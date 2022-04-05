@@ -24,7 +24,7 @@ add_filter( 'the_excerpt', __NAMESPACE__ . '\remove_content_hooks', 9 );
 add_filter( 'query_vars', __NAMESPACE__ . '\add_query_vars' );
 add_filter( 'template_include', __NAMESPACE__ . '\include_template' );
 add_action( 'sc_event_details', __NAMESPACE__ . '\add_ics_link', 11 );
-add_action( 'pfmc_before_entry_content', __NAMESPACE__ . '\add_ics_link' );
+add_action( 'pfmc_council_meeting_meta', __NAMESPACE__ . '\add_ics_link' );
 
 /**
  * Expose the `sc_event` post type in the REST API.
