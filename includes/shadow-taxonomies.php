@@ -13,6 +13,8 @@ add_action( 'publish_managed_fishery', __NAMESPACE__ . '\update_shadow_taxonomy'
 add_action( 'publish_council_meeting', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
 add_action( 'draft_managed_fishery', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
 add_action( 'draft_council_meeting', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
+add_action( 'trash_managed_fishery', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
+add_action( 'trash_council_meeting', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
 
 add_filter( 'get_the_archive_title', __NAMESPACE__ . '\filter_managed_fishery_connect_archive_title', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_pinned_term_script' );
