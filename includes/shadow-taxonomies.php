@@ -52,8 +52,8 @@ function register_taxonomies() {
 		'publicly_queryable'    => true,
 		'hierarchical'          => true,
 		'show_ui'               => true,
-		'show_in_menu'          => true,
-		'show_in_nav_menus'     => true,
+		'show_in_menu'          => false,
+		'show_in_nav_menus'     => false,
 		'query_var'             => true,
 		'rewrite'               => array(
 			'slug'       => 'managed_fishery_connect',
@@ -81,8 +81,8 @@ function register_taxonomies() {
 		'publicly_queryable'    => true,
 		'hierarchical'          => true,
 		'show_ui'               => true,
-		'show_in_menu'          => true,
-		'show_in_nav_menus'     => true,
+		'show_in_menu'          => false,
+		'show_in_nav_menus'     => false,
 		'query_var'             => true,
 		'rewrite'               => array(
 			'slug'       => 'council_meeting_connect',
