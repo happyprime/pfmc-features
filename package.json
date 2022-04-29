@@ -1,6 +1,6 @@
 {
   "name": "pfmc-feature-set",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Custom features for pcouncil.org.",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
