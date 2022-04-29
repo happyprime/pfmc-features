@@ -5,7 +5,7 @@
  * Description:       Custom features for the Pacific Fishery Management Council website.
  * Author:            Happy Prime
  * Author URI:        https://happyprime.co
- * Version:           0.3.1
+ * Version:           0.3.2
  *
  * @package     PFMC_Features
  */
