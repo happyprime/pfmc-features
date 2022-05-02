@@ -733,19 +733,19 @@ function adjust_date_time_details() {
  * @param int $post_id Post ID
  */
 function add_date_time_details( $post_id = 0 ) {
-	$event      = sugar_calendar_get_event_by_object( $post_id );
-	$all_day    = $event->is_all_day();
-	$start      = $event->start ?? false;
-	$end        = $event->end ?? false;
+	$event   = sugar_calendar_get_event_by_object( $post_id );
+	$all_day = $event->is_all_day();
+	$start   = $event->start ?? false;
+	$end     = $event->end ?? false;
 
 	?>
 	<div class="sc_event_date">
-		<?php echo esc_html__( 'Date:', 'pfmc' ) . ' ' . sc_get_event_date( $post_id ); ?>
+		<?php echo esc_html__( 'Date:', 'pfmc' ) . ' ' . esc_html( sc_get_event_date( $post_id ) ); ?>
 	</div>
 	<?php
 
 	// If the event is all day or spans multiple days, stop here.
-	if ( $all_day || ( $start && $end && explode( ' ', $start )[0] !== explode( ' ', $end )[0] ) ) {
+	if ( $all_day || ( $start && $end && explode( ' ', $start )[0] !== explode( ' ', $end )[0] ) ) { // phpcs:ignore WordPress.PHP.YodaConditions.NotYoda
 		return;
 	}
 
@@ -763,10 +763,12 @@ function add_date_time_details( $post_id = 0 ) {
 
 	// Add the time zone offset to the format if the event has time zone data.
 	if ( ! empty( $event->start_tz ) && ( $end_time !== $start_time ) ) {
-		$offset = sugar_calendar_get_timezone_offset( array(
-			'time'     => $event->start,
-			'timezone' => $event->start_tz
-		) );
+		$offset = sugar_calendar_get_timezone_offset(
+			array(
+				'time'     => $event->start,
+				'timezone' => $event->start_tz,
+			)
+		);
 		$format = "Y-m-d\TH:i:s{$offset}";
 		$tz     = $event->start_tz;
 	}
@@ -777,7 +779,7 @@ function add_date_time_details( $post_id = 0 ) {
 	<div class="sc_event_time">
 		<span class="sc_event_start_time">
 			<?php esc_html_e( 'Time:', 'sugar-calendar' ); ?>
-			<time datetime="<?php echo esc_attr( $dt ); ?>" title="<?php echo esc_attr( $dt ); ?>" data-timezone="<?php echo esc_attr( $tz ); ?>"><?php echo esc_html( $start_time );?></time>
+			<time datetime="<?php echo esc_attr( $dt ); ?>" title="<?php echo esc_attr( $dt ); ?>" data-timezone="<?php echo esc_attr( $tz ); ?>"><?php echo esc_html( $start_time ); ?></time>
 		</span>
 	<?php
 
@@ -785,12 +787,14 @@ function add_date_time_details( $post_id = 0 ) {
 
 		// Add the time zone offset to the format if the event has time zone data.
 		if ( ! empty( $event->end_tz ) ) {
-			$offset = sugar_calendar_get_timezone_offset( array(
-				'time'     => $event->end,
-				'timezone' => $event->end_tz
-			) );
+			$offset = sugar_calendar_get_timezone_offset(
+				array(
+					'time'     => $event->end,
+					'timezone' => $event->end_tz,
+				)
+			);
 			$format = "Y-m-d\TH:i:s{$offset}";
-			$tz = $event->end_tz;
+			$tz     = $event->end_tz;
 		}
 
 		$dt = $event->end_date( $format );
