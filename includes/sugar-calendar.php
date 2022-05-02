@@ -281,7 +281,7 @@ function get_events_list( $display = 'upcoming', $taxonomies = array(), $number 
 		echo '<span class="sc_event_title">' . wp_kses_post( get_the_title( $event_id ) ) . '</span></a>';
 
 		if ( ! empty( $show['date'] ) ) {
-			echo '<span class="sc_event_date">' . esc_html( sc_get_formatted_date( $event_id ) ) . '</span>';
+			echo '<span class="sc_event_date">' . wp_kses_post( sc_get_formatted_date( $event_id ) ) . '</span>';
 		}
 
 		if ( isset( $show['time'] ) && $show['time'] ) {
@@ -740,7 +740,7 @@ function add_date_time_details( $post_id = 0 ) {
 
 	?>
 	<div class="sc_event_date">
-		<?php echo esc_html__( 'Date:', 'pfmc' ) . ' ' . esc_html( sc_get_event_date( $post_id ) ); ?>
+		<?php echo esc_html__( 'Date:', 'pfmc' ) . ' ' . wp_kses_post( sc_get_event_date( $post_id ) ); ?>
 	</div>
 	<?php
 
