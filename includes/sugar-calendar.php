@@ -705,6 +705,11 @@ function include_template( $template ) {
  * @param int $post_id ID of the event post.
  */
 function add_ics_link( $post_id ) {
+	$event           = sugar_calendar_get_event_by_object( intval( $post_id ) );
+	$time_zone       = sugar_calendar_get_timezone();
+	$start_time_zone = ! empty( $event->start_tz ) ? $event->start_tz : $time_zone;
+	$end_time_zone   = ! empty( $event->end_tz ) ? $event->end_tz : $time_zone;
+
 	$ics_link = add_query_arg(
 		array(
 			'pfmc_sc_event_ics' => true,
@@ -712,9 +717,37 @@ function add_ics_link( $post_id ) {
 		),
 		get_permalink()
 	);
+
+	$ms_link = add_query_arg(
+		array(
+			'body'     => esc_html( get_the_excerpt() ),
+			'enddt'    => $event->end_date( 'c', $start_time_zone ),
+			'location' => $event->location,
+			'path'     => '/calendar/action/compose',
+			'rru'      => 'addevent',
+			'startdt'  => $event->start_date( 'c', $end_time_zone ),
+			'subject'  => get_the_title(),
+		),
+		'https://outlook.office.com/calendar/0/deeplink/compose'
+	);
+
+	$google_link = add_query_arg(
+		array(
+			'action'   => 'TEMPLATE',
+			'ctz'      => $start_time_zone,
+			'dates'    => $event->start_date( 'Ymd\THi00\Z', $start_time_zone ) . '%2F' . $event->end_date( 'Ymd\THi00\Z', $end_time_zone ),
+			'details'  => get_the_excerpt(),
+			'location' => $event->location,
+			'text'     => get_the_title(),
+		),
+		'https://calendar.google.com/calendar/render'
+	);
 	?>
 	<div class="sc_event_add_to_calendar">
-		<a href="<?php echo esc_url( $ics_link ); ?>"><?php esc_html_e( 'Add to calendar', 'pfmc' ); ?></a>
+		<span><?php esc_html_e( 'Add to calendar', 'pfmc' ); ?></span>
+		<a class="ics" href="<?php echo esc_url( $ics_link ); ?>">.ics file</a>
+		<a class="microsoft" href="<?php echo esc_url( $ms_link ); ?>">Office/Outlook</a>
+		<a class="google" href="<?php echo esc_url( $google_link ); ?>">Google</a>
 	</div>
 	<?php
 }
