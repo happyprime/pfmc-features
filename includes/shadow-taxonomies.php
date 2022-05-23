@@ -13,6 +13,8 @@ add_action( 'publish_managed_fishery', __NAMESPACE__ . '\update_shadow_taxonomy'
 add_action( 'publish_council_meeting', __NAMESPACE__ . '\update_shadow_taxonomy', 10, 2 );
 add_action( 'draft_managed_fishery', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
 add_action( 'draft_council_meeting', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
+add_action( 'trash_managed_fishery', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
+add_action( 'trash_council_meeting', __NAMESPACE__ . '\remove_shadow_taxonomy', 10, 2 );
 
 add_filter( 'get_the_archive_title', __NAMESPACE__ . '\filter_managed_fishery_connect_archive_title', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_pinned_term_script' );
@@ -50,8 +52,8 @@ function register_taxonomies() {
 		'publicly_queryable'    => true,
 		'hierarchical'          => true,
 		'show_ui'               => true,
-		'show_in_menu'          => true,
-		'show_in_nav_menus'     => true,
+		'show_in_menu'          => false,
+		'show_in_nav_menus'     => false,
 		'query_var'             => true,
 		'rewrite'               => array(
 			'slug'       => 'managed_fishery_connect',
@@ -79,8 +81,8 @@ function register_taxonomies() {
 		'publicly_queryable'    => true,
 		'hierarchical'          => true,
 		'show_ui'               => true,
-		'show_in_menu'          => true,
-		'show_in_nav_menus'     => true,
+		'show_in_menu'          => false,
+		'show_in_nav_menus'     => false,
 		'query_var'             => true,
 		'rewrite'               => array(
 			'slug'       => 'council_meeting_connect',
