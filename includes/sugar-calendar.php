@@ -23,8 +23,8 @@ add_filter( 'the_content', __NAMESPACE__ . '\remove_content_hooks', 9 );
 add_filter( 'the_excerpt', __NAMESPACE__ . '\remove_content_hooks', 9 );
 add_filter( 'query_vars', __NAMESPACE__ . '\add_query_vars' );
 add_filter( 'template_include', __NAMESPACE__ . '\include_template' );
-add_action( 'sc_event_details', __NAMESPACE__ . '\add_ics_link', 11 );
-add_action( 'pfmc_council_meeting_meta', __NAMESPACE__ . '\add_ics_link' );
+add_action( 'sc_event_details', __NAMESPACE__ . '\display_add_to_calendar_links', 11 );
+add_action( 'pfmc_council_meeting_meta', __NAMESPACE__ . '\display_add_to_calendar_links' );
 add_action( 'init', __NAMESPACE__ . '\adjust_date_time_details' );
 
 /**
@@ -281,7 +281,7 @@ function get_events_list( $display = 'upcoming', $taxonomies = array(), $number 
 		echo '<span class="sc_event_title">' . wp_kses_post( get_the_title( $event_id ) ) . '</span></a>';
 
 		if ( ! empty( $show['date'] ) ) {
-			echo '<span class="sc_event_date">' . esc_html( sc_get_formatted_date( $event_id ) ) . '</span>';
+			echo '<span class="sc_event_date">' . wp_kses_post( sc_get_formatted_date( $event_id ) ) . '</span>';
 		}
 
 		if ( isset( $show['time'] ) && $show['time'] ) {
@@ -700,11 +700,32 @@ function include_template( $template ) {
 }
 
 /**
+ * Return event date in GMT.
+ *
+ * @param string $timestamp Event timestamp.
+ * @param string $time_zone Event time zone.
+ * @return object DateTime object.
+ */
+function get_date_in_gmt( $timestamp, $time_zone ) {
+	$date = new \DateTime( $timestamp, new \DateTimeZone( $time_zone ) );
+	$date->setTimezone( new \DateTimeZone( 'GMT' ) );
+
+	return $date;
+}
+
+/**
  * Add an `Add to calendar` link to single event views.
  *
  * @param int $post_id ID of the event post.
  */
-function add_ics_link( $post_id ) {
+function display_add_to_calendar_links( $post_id ) {
+	$event           = sugar_calendar_get_event_by_object( intval( $post_id ) );
+	$start_time      = $event->start_date();
+	$end_time        = $event->end_date();
+	$time_zone       = sugar_calendar_get_timezone();
+	$start_time_zone = ! empty( $event->start_tz ) ? $event->start_tz : $time_zone;
+	$end_time_zone   = ! empty( $event->end_tz ) ? $event->end_tz : $time_zone;
+
 	$ics_link = add_query_arg(
 		array(
 			'pfmc_sc_event_ics' => true,
@@ -712,9 +733,41 @@ function add_ics_link( $post_id ) {
 		),
 		get_permalink()
 	);
+
+	$ms_start = get_date_in_gmt( $start_time, $start_time_zone )->format( 'c' );
+	$ms_end   = get_date_in_gmt( $end_time, $end_time_zone )->format( 'c' );
+	$ms_link  = add_query_arg(
+		array(
+			'body'     => esc_html( get_the_excerpt() ),
+			'enddt'    => $ms_end,
+			'location' => $event->location,
+			'path'     => '/calendar/action/compose',
+			'rru'      => 'addevent',
+			'startdt'  => $ms_start,
+			'subject'  => get_the_title(),
+		),
+		'https://outlook.office.com/calendar/0/deeplink/compose'
+	);
+
+	$google_start = get_date_in_gmt( $start_time, $start_time_zone )->format( 'Ymd\THi00\Z' );
+	$google_end   = get_date_in_gmt( $end_time, $end_time_zone )->format( 'Ymd\THi00\Z' );
+	$google_link  = add_query_arg(
+		array(
+			'action'   => 'TEMPLATE',
+			'ctz'      => $start_time_zone,
+			'dates'    => $google_start . '%2F' . $google_end,
+			'details'  => get_the_excerpt(),
+			'location' => $event->location,
+			'text'     => get_the_title(),
+		),
+		'https://calendar.google.com/calendar/render'
+	);
 	?>
 	<div class="sc_event_add_to_calendar">
-		<a href="<?php echo esc_url( $ics_link ); ?>"><?php esc_html_e( 'Add to calendar', 'pfmc' ); ?></a>
+		<span><?php esc_html_e( 'Add to calendar', 'pfmc' ); ?></span>
+		<a class="ics" href="<?php echo esc_url( $ics_link ); ?>">.ics file</a>
+		<a class="microsoft" href="<?php echo esc_url( $ms_link ); ?>">Office/Outlook</a>
+		<a class="google" href="<?php echo esc_url( $google_link ); ?>">Google</a>
 	</div>
 	<?php
 }
@@ -733,19 +786,19 @@ function adjust_date_time_details() {
  * @param int $post_id Post ID
  */
 function add_date_time_details( $post_id = 0 ) {
-	$event      = sugar_calendar_get_event_by_object( $post_id );
-	$all_day    = $event->is_all_day();
-	$start      = $event->start ?? false;
-	$end        = $event->end ?? false;
+	$event   = sugar_calendar_get_event_by_object( $post_id );
+	$all_day = $event->is_all_day();
+	$start   = $event->start ?? false;
+	$end     = $event->end ?? false;
 
 	?>
 	<div class="sc_event_date">
-		<?php echo esc_html__( 'Date:', 'pfmc' ) . ' ' . sc_get_event_date( $post_id ); ?>
+		<?php echo esc_html__( 'Date:', 'pfmc' ) . ' ' . wp_kses_post( sc_get_event_date( $post_id ) ); ?>
 	</div>
 	<?php
 
 	// If the event is all day or spans multiple days, stop here.
-	if ( $all_day || ( $start && $end && explode( ' ', $start )[0] !== explode( ' ', $end )[0] ) ) {
+	if ( $all_day || ( $start && $end && explode( ' ', $start )[0] !== explode( ' ', $end )[0] ) ) { // phpcs:ignore WordPress.PHP.YodaConditions.NotYoda
 		return;
 	}
 
@@ -763,10 +816,12 @@ function add_date_time_details( $post_id = 0 ) {
 
 	// Add the time zone offset to the format if the event has time zone data.
 	if ( ! empty( $event->start_tz ) && ( $end_time !== $start_time ) ) {
-		$offset = sugar_calendar_get_timezone_offset( array(
-			'time'     => $event->start,
-			'timezone' => $event->start_tz
-		) );
+		$offset = sugar_calendar_get_timezone_offset(
+			array(
+				'time'     => $event->start,
+				'timezone' => $event->start_tz,
+			)
+		);
 		$format = "Y-m-d\TH:i:s{$offset}";
 		$tz     = $event->start_tz;
 	}
@@ -777,7 +832,7 @@ function add_date_time_details( $post_id = 0 ) {
 	<div class="sc_event_time">
 		<span class="sc_event_start_time">
 			<?php esc_html_e( 'Time:', 'sugar-calendar' ); ?>
-			<time datetime="<?php echo esc_attr( $dt ); ?>" title="<?php echo esc_attr( $dt ); ?>" data-timezone="<?php echo esc_attr( $tz ); ?>"><?php echo esc_html( $start_time );?></time>
+			<time datetime="<?php echo esc_attr( $dt ); ?>" title="<?php echo esc_attr( $dt ); ?>" data-timezone="<?php echo esc_attr( $tz ); ?>"><?php echo esc_html( $start_time ); ?></time>
 		</span>
 	<?php
 
@@ -785,12 +840,14 @@ function add_date_time_details( $post_id = 0 ) {
 
 		// Add the time zone offset to the format if the event has time zone data.
 		if ( ! empty( $event->end_tz ) ) {
-			$offset = sugar_calendar_get_timezone_offset( array(
-				'time'     => $event->end,
-				'timezone' => $event->end_tz
-			) );
+			$offset = sugar_calendar_get_timezone_offset(
+				array(
+					'time'     => $event->end,
+					'timezone' => $event->end_tz,
+				)
+			);
 			$format = "Y-m-d\TH:i:s{$offset}";
-			$tz = $event->end_tz;
+			$tz     = $event->end_tz;
 		}
 
 		$dt = $event->end_date( $format );
